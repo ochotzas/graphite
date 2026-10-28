@@ -1,0 +1,15 @@
+{
+  "name": "ochotzas",
+  "description": "Plugins by Olger Chotza",
+  "owner": {
+    "name": "Olger Chotza",
+    "url": "https://ochotzas.com"
+  },
+  "plugins": [
+    {
+      "name": "graphite",
+      "source": "./",
+      "description": "A monotone, calm, Apple-simple design system for any UI work."
+    }
+  ]
+}

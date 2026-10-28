@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graphite Motion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<style>
+  /* Page aliases for the motion tokens */
+  :root { --ease: var(--spring); --dur: var(--dur-spring); --press: var(--press-scale); }
+  /* Reference page only: keep animating with reduced motion on so it can be reviewed.
+     In real products, follow the reduced-motion rules in motion.md instead. */
+  @media (prefers-reduced-motion: reduce) { .page *, .page *::before, .page *::after { transition-duration: var(--dur, 300ms) !important; } }
+
+  .page { max-width: 1240px; margin: 0 auto; padding: var(--space-8) var(--gutter) var(--space-9); }
+  h1, h2, p { margin: 0; }
+  .h1 { font-size: var(--text-title1); line-height: var(--lh-title1); letter-spacing: var(--track-title1); font-weight: 700; }
+  .h2 { font-size: var(--text-title2); line-height: var(--lh-title2); letter-spacing: var(--track-title2); font-weight: 700; }
+  .lead { color: var(--ink-2); margin-top: var(--space-2); max-width: 620px; }
+  .sec-head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-4); flex-wrap: wrap; margin: var(--space-8) 0 var(--space-5); }
+  .footnote { font-size: var(--text-footnote); line-height: var(--lh-footnote); font-weight: 500; color: var(--ink-2); }
+  .label { display: flex; align-items: center; gap: var(--space-2); font-weight: 600; font-size: 17px; }
+  .label b { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font-size: 13px; }
+  .grid { display: grid; gap: var(--space-6) var(--space-5); grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .card header { margin-bottom: var(--space-3); }
+  .card header p { margin-top: 2px; }
+
+  /* ---------- Shared component bits ---------- */
+  .btn { height: 50px; padding: 0 var(--space-5); border: 0; border-radius: var(--radius-full); cursor: pointer; font: 600 16px/1 var(--font); display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform var(--dur, 300ms) var(--ease, ease-out); -webkit-tap-highlight-color: transparent; user-select: none; }
+  .btn:active { transform: scale(var(--press, 0.97)); transition-duration: 90ms; }
+  .btn-primary { background: var(--ink); color: var(--on-ink); }
+  .btn-secondary { background: var(--surface); color: var(--ink); }
+  .btn-sm { height: 38px; font-size: 15px; padding: 0 var(--space-4); }
+  .btn-block { width: 100%; }
+  .island { background: var(--surface); border-radius: var(--radius-lg); }
+  .island-list { padding: 2px var(--space-4); }
+  .row { display: flex; align-items: center; gap: var(--space-3); min-height: 48px; padding: 11px 0; cursor: pointer; user-select: none; }
+  .row + .row { box-shadow: inset 0 1px 0 var(--line); }
+  .row-title { flex: 1; font-weight: 500; font-size: 15px; transition: color 250ms ease-out; }
+  .row.done .row-title { color: var(--ink-3); }
+  .row-trail { font-size: 13px; font-weight: 500; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .check { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--ring); display: grid; place-items: center; color: var(--surface); transition: background 160ms ease-out, border-color 160ms ease-out; }
+  .check svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+  .done .check { background: var(--ink); border-color: var(--ink); }
+  .done .check svg { opacity: 1; }
+  .progress { display: flex; gap: 3px; height: 7px; border-radius: 99px; background: var(--track); overflow: hidden; margin-top: 10px; }
+  .progress i { flex: 1; border-radius: 99px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform var(--dur, 300ms) var(--ease, ease-out); }
+  .progress i.on { transform: scaleX(1); }
+
+  /* ---------- Device frame ---------- */
+  .stage { position: relative; height: 560px; border-radius: var(--radius-xl); overflow: hidden; background: var(--bg); box-shadow: 0 0 0 1px var(--line), 0 30px 60px -36px rgba(0,0,0,0.4); isolation: isolate; }
+  .stage.short { height: 400px; }
+  .screen { position: absolute; inset: 0; padding: 22px 18px 18px; display: flex; flex-direction: column; background: var(--bg); }
+  .screen .top { display: flex; justify-content: space-between; align-items: center; }
+  .screen .title { font-size: 32px; line-height: 36px; letter-spacing: -0.03em; font-weight: 700; margin: 12px 0 16px; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--on-ink); display: grid; place-items: center; font-size: 13px; font-weight: 600; }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+  .stat-line { display: flex; align-items: baseline; gap: 6px; }
+  .stat { font-size: 30px; line-height: 34px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; display: inline-block; }
+  .bottom { margin-top: auto; padding-top: 14px; }
+
+  .scrim { position: absolute; inset: 0; background: var(--scrim); opacity: 0; pointer-events: none; transition: opacity var(--dur, 300ms) ease-out; z-index: 4; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--bg); border-radius: 28px 28px 0 0; padding: 10px 18px 18px; z-index: 5;
+    transform: translateY(105%); transition: transform var(--dur, 300ms) var(--ease, ease-out); box-shadow: var(--shadow-float); }
+  .open > .scrim { opacity: 1; pointer-events: auto; }
+  .open > .sheet { transform: none; }
+  .grabber { width: 34px; height: 5px; border-radius: 99px; background: var(--track); margin: 0 auto 14px; }
+  .sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-weight: 600; font-size: 17px; }
+  .input { height: 48px; padding: 0 14px; border: 0; border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; outline: none; width: 100%; transition: box-shadow 150ms; }
+  .input:focus { box-shadow: 0 0 0 2px var(--ink); }
+  .input[aria-invalid="true"] { box-shadow: 0 0 0 2px var(--danger); }
+  .toast { position: absolute; left: 50%; bottom: 82px; z-index: 3; display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 18px; border-radius: 99px; background: var(--ink); color: var(--on-ink);
+    font-size: 14px; font-weight: 500; white-space: nowrap; box-shadow: var(--shadow-float); transform: translate(-50%, 160%); opacity: 0;
+    transition: transform var(--dur, 300ms) var(--ease, ease-out), opacity 200ms ease-out; }
+  .toast.show { transform: translate(-50%, 0); opacity: 1; }
+  .toast span { opacity: 0.6; font-weight: 600; }
+
+  .hint { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font-size: 12px; color: var(--ink-3); font-weight: 500; pointer-events: none; z-index: 1; }
+
+  /* ---------- E1 Push back ---------- */
+  .e1 { background: #000; }
+  .e1 .screen { transform-origin: 50% 0; transition: transform var(--dur) var(--ease), border-radius var(--dur) var(--ease), filter var(--dur) ease-out; }
+  .e1.open .screen { transform: translateY(14px) scale(0.92); border-radius: 26px; filter: brightness(0.75); }
+  .e1 .sheet { top: 40px; border-radius: 28px 28px 0 0; }
+  .e1 > .scrim { background: transparent; }
+
+  /* ---------- E3 Rolling numbers ---------- */
+  .roller { display: flex; font-size: 76px; line-height: 1; height: 76px; font-weight: 700; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; overflow: hidden; }
+  .col { display: flex; flex-direction: column; transition: transform var(--dur) var(--ease), opacity 200ms, width var(--dur) var(--ease); width: 0.6em; }
+  .col.hide { opacity: 0; width: 0; }
+  .col span { height: 76px; }
+
+  /* ---------- E5 Large title ---------- */
+  .scroller { position: absolute; inset: 0; overflow-y: auto; padding: 52px 18px 24px; scrollbar-width: none; }
+  .scroller::-webkit-scrollbar { display: none; }
+  .navbar { position: absolute; top: 0; left: 0; right: 0; height: 48px; z-index: 2; display: grid; place-items: center; font-weight: 600; font-size: 16px;
+    transition: background 200ms ease-out, box-shadow 200ms ease-out; }
+  .navbar span { opacity: 0; transform: translateY(6px); transition: opacity 220ms ease-out, transform var(--dur) var(--ease); }
+  .navbar.scrolled { background: color-mix(in srgb, var(--bg) 78%, transparent); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); box-shadow: 0 1px 0 var(--line); }
+  .navbar.scrolled span { opacity: 1; transform: none; }
+  .big-title { font-size: 34px; letter-spacing: -0.03em; font-weight: 700; line-height: 40px; margin-bottom: 14px; transform-origin: left center; }
+
+  /* ---------- E6 Swipe ---------- */
+  .swipe-row { position: relative; overflow: hidden; }
+  .swipe-row + .swipe-row { box-shadow: inset 0 1px 0 var(--line); }
+  .swipe-action { position: absolute; inset: 0 0 0 auto; width: 100%; background: var(--danger); color: #fff; display: flex; justify-content: flex-end; align-items: center; padding-right: 22px; font-weight: 600; font-size: 15px; cursor: pointer; }
+  .swipe-front { position: relative; background: var(--surface); display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; touch-action: pan-y; cursor: grab; user-select: none; }
+  .swipe-front:active { cursor: grabbing; }
+
+  /* ---------- E8 Liquid tabs ---------- */
+  .tabs { position: relative; display: flex; padding: 4px; border-radius: 99px; background: var(--surface); }
+  .tabs button { position: relative; z-index: 1; flex: 1; height: 40px; border: 0; background: none; font: 500 14px var(--font); color: var(--ink-2); cursor: pointer; transition: color 200ms; }
+  .tabs button[aria-pressed="true"] { color: var(--on-ink); font-weight: 600; }
+  .tab-ind { position: absolute; top: 4px; bottom: 4px; border-radius: 99px; background: var(--ink); }
+  .tabbar { position: absolute; left: 14px; right: 14px; bottom: 16px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="ck" viewBox="0 0 12 12"><path d="M2.5 6.3l2.3 2.2L9.5 3.5"/></symbol></svg>
+
+<main class="page">
+  <h1 class="h1">Motion</h1>
+  <p class="lead">Graphite moves with one spring (stiffness 380, damping 30). Reference implementation for <code>motion.md</code> — copy from here.</p>
+
+  <!-- ================= Everyday ================= -->
+  <div class="sec-head">
+    <div><h2 class="h2">Everyday</h2><p class="footnote" style="margin-top:4px">Press, check, count, progress, toast, sheet with push back.</p></div>
+    <button class="btn btn-primary btn-sm" id="playall">Play</button>
+  </div>
+  <div class="grid" id="feels"></div>
+
+  <!-- ================= Signature ================= -->
+  <div class="sec-head">
+    <div><h2 class="h2">Signature effects</h2><p class="footnote" style="margin-top:4px">Numbers match motion.md.</p></div>
+  </div>
+  <div class="grid" id="effects">
+
+    <section class="card">
+      <header><p class="label"><b>1</b>Push back</p><p class="footnote">Opening a sheet pushes the screen back, like iOS modals.</p></header>
+      <div class="stage short e1" id="e1">
+        <div class="screen">
+          <div class="top"><span class="footnote">Monday, 12 October</span><span class="avatar">O</span></div>
+          <p class="title">Today</p>
+          <div class="island island-list"><div class="row"><span class="check"></span><span class="row-title">Review Q3 budget</span></div><div class="row"><span class="check"></span><span class="row-title">Run 5k by the river</span></div></div>
+          <div class="bottom"><button class="btn btn-primary btn-block" data-open>New task</button></div>
+        </div>
+        <div class="scrim" data-close></div>
+        <div class="sheet"><div class="grabber"></div><div class="sheet-head">New task<button class="btn btn-secondary btn-sm" data-close>Done</button></div><input class="input" placeholder="Water the plants"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <header><p class="label"><b>3</b>Rolling numbers</p><p class="footnote">Digits roll into place like a counter.</p></header>
+      <div class="stage short"><div class="screen">
+        <p class="footnote">Steps today</p>
+        <div class="roller" id="roller" style="margin-top: 8px"></div>
+        <div class="bottom" style="display:flex;gap:8px"><button class="btn btn-secondary btn-sm" data-add="1">+1</button><button class="btn btn-secondary btn-sm" data-add="250">+250</button><button class="btn btn-primary btn-sm" data-add="rand" style="flex:1">Random</button></div>
+      </div></div>
+    </section>
+
+    <section class="card">
+      <header><p class="label"><b>4</b>Blur swap</p><p class="footnote">Text changes melt through a soft blur instead of cutting.</p></header>
+      <div class="stage short"><div class="screen">
+        <p class="footnote" id="blur-sub">3 tasks left</p>
+        <p class="title" id="blur-title" style="font-size:44px;line-height:48px;margin-top:6px">Today</p>
+        <div class="bottom"><button class="btn btn-primary btn-block" id="blur-btn">Next</button></div>
+      </div></div>
+    </section>
+
+    <section class="card">
+      <header><p class="label"><b>5</b>Collapsing title</p><p class="footnote">Big title scrolls away into a frosted bar.</p></header>
+      <div class="stage short">
+        <div class="navbar" id="navbar"><span>Inbox</span></div>
+        <div class="scroller" id="scroller">
+          <p class="big-title" id="bigtitle">Inbox</p>
+          <div class="island island-list" id="longlist"></div>
+        </div>
+        <p class="hint">Scroll ↓</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <header><p class="label"><b>6</b>Swipe to delete</p><p class="footnote">Drag rows left. Rubber-band resistance, spring back.</p></header>
+      <div class="stage short"><div class="screen">
+        <p class="title" style="margin-top:0">Inbox</p>
+        <div class="island" style="overflow:hidden" id="swipelist"></div>
+        <div class="bottom"><button class="btn btn-secondary btn-block" id="swipe-reset">Reset</button></div>
+      </div></div>
+    </section>
+
+    <section class="card">
+      <header><p class="label"><b>7</b>Shake on error</p><p class="footnote">Wrong input shakes “no” — like the iOS passcode.</p></header>
+      <div class="stage short"><div class="screen">
+        <p class="title" style="margin-top:0">Sign in</p>
+        <div class="stack">
+          <input class="input" id="pw" type="password" placeholder="Password (try anything)">
+          <p class="footnote" id="pw-err" style="color:var(--danger);opacity:0;transition:opacity 200ms">Wrong password. Try again.</p>
+        </div>
+        <div class="bottom"><button class="btn btn-primary btn-block" id="pw-btn">Sign in</button></div>
+      </div></div>
+    </section>
+
+    <section class="card">
+      <header><p class="label"><b>8</b>Liquid tabs</p><p class="footnote">The selection stretches as it slides — the leading edge moves first.</p></header>
+      <div class="stage short"><div class="screen">
+        <p class="title" style="margin-top:0" id="tab-title">Today</p>
+        <p class="footnote">Tap the tabs below.</p>
+        <div class="tabbar"><div class="tabs" id="tabs"><span class="tab-ind" id="tab-ind"></span><button aria-pressed="true">Today</button><button aria-pressed="false">Upcoming</button><button aria-pressed="false">Inbox</button><button aria-pressed="false">You</button></div></div>
+      </div></div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+/* ---------- Read motion tokens from tokens.css (for Web Animations API calls) ---------- */
+const css = getComputedStyle(document.documentElement);
+const token = (easing, dur) => ({ easing: css.getPropertyValue(easing).trim(), dur: parseFloat(css.getPropertyValue(dur)) });
+const DEFAULT = { ...token('--spring', '--dur-spring'), pop: 0.6, blur: 0 };
+const FAST = token('--spring-fast', '--dur-spring-fast'), SLOW = token('--spring-slow', '--dur-spring-slow');
+const FEELS = [{ k: '✓', name: 'Spring', desc: 'Tap tasks and “New task” — the sheet uses Push back.', ...DEFAULT }];
+const ck = '<svg><use href="#ck"/></svg>';
+
+/* ---------- Part 1: feels ---------- */
+const TASKS = [['Call the bank', '9:00', 1], ['Pick up film', '11:30', 1], ['Review Q3 budget', '14:00', 0], ['Run 5k by the river', '18:30', 0], ['Book flights', '', 0]];
+const feelsEl = document.getElementById('feels');
+feelsEl.innerHTML = FEELS.map(f => `
+  <section class="card">
+    <header><p class="label"><b>${f.k}</b>${f.name}</p><p class="footnote">${f.desc}</p></header>
+    <div class="stage feel e1" data-k="${f.k}">
+      <div class="screen">
+        <div class="top"><span class="footnote">Monday, 12 October</span><span class="avatar">O</span></div>
+        <p class="title">Today</p>
+        <div class="stack">
+          <div class="island" style="padding:16px"><div class="stat-line"><span class="stat"><span class="n">2</span></span><span class="footnote" style="font-size:15px">of 5 done</span></div><div class="progress">${TASKS.map(() => '<i></i>').join('')}</div></div>
+          <div class="island island-list">${TASKS.map(([n, t, d]) => `<div class="row ${d ? 'done' : ''}"><span class="check">${ck}</span><span class="row-title">${n}</span><span class="row-trail">${t}</span></div>`).join('')}</div>
+        </div>
+        <div class="bottom"><button class="btn btn-primary btn-block" data-open>New task</button></div>
+      </div>
+      <div class="toast">Done <span>Undo</span></div>
+      <div class="scrim" data-close></div>
+      <div class="sheet"><div class="grabber"></div><div class="sheet-head">New task<button class="btn btn-secondary btn-sm" data-close>Cancel</button></div>
+        <input class="input" placeholder="Water the plants"><button class="btn btn-primary btn-block" style="margin-top:12px" data-close>Add task</button></div>
+    </div>
+  </section>`).join('');
+
+document.querySelectorAll('.feel').forEach(stage => {
+  const f = FEELS.find(x => x.k === stage.dataset.k);
+  const n = stage.querySelector('.n'), segs = [...stage.querySelectorAll('.progress i')], toast = stage.querySelector('.toast');
+  let tt;
+  const sync = (animate) => {
+    const done = stage.querySelectorAll('.row.done').length;
+    segs.forEach((s, i) => s.classList.toggle('on', i < done));
+    if (n.textContent != done) {
+      const up = done > +n.textContent; n.textContent = done;
+      if (animate) n.animate([{ transform: `translateY(${up ? 60 : -60}%)`, opacity: 0, filter: `blur(${f.blur}px)` }, { transform: 'none', opacity: 1, filter: 'blur(0)' }], { duration: f.dur, easing: f.easing });
+    }
+  };
+  stage.toggleRow = (row) => {
+    row.classList.toggle('done');
+    row.querySelector('.check').animate([{ transform: `scale(${f.pop})` }, { transform: 'scale(1)' }], { duration: f.dur, easing: f.easing });
+    if (f.blur) row.querySelector('.row-title').animate([{ filter: `blur(${f.blur / 2}px)`, opacity: 0.5 }, { filter: 'blur(0)', opacity: 1 }], { duration: f.dur * 0.8, easing: 'ease-out' });
+    sync(true);
+    if (row.classList.contains('done')) { toast.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => toast.classList.remove('show'), 1600); }
+  };
+  stage.querySelectorAll('.row').forEach(r => r.onclick = () => stage.toggleRow(r));
+  sync(false);
+});
+
+document.addEventListener('click', e => {
+  const o = e.target.closest('[data-open]'); if (o) o.closest('.stage').classList.add('open');
+  const c = e.target.closest('[data-close]'); if (c) c.closest('.stage').classList.remove('open');
+});
+
+document.getElementById('playall').onclick = () => {
+  const stages = [...document.querySelectorAll('.feel')];
+  const at = (ms, fn) => setTimeout(() => stages.forEach(fn), ms);
+  at(0,    s => s.toggleRow(s.querySelectorAll('.row')[2]));
+  at(900,  s => s.toggleRow(s.querySelectorAll('.row')[3]));
+  at(2200, s => s.classList.add('open'));
+  at(3600, s => s.classList.remove('open'));
+  at(4600, s => { s.toggleRow(s.querySelectorAll('.row')[3]); });
+  at(5200, s => { s.toggleRow(s.querySelectorAll('.row')[2]); });
+};
+
+/* ---------- E3 Rolling numbers ---------- */
+(() => {
+  const el = document.getElementById('roller'), D = 5; let value = 8412;
+  el.innerHTML = Array.from({ length: D }, () => `<div class="col">${[0,1,2,3,4,5,6,7,8,9].map(d => `<span>${d}</span>`).join('')}</div>`).join('');
+  const cols = [...el.children];
+  const render = () => {
+    const s = String(value).padStart(D, '0'), lead = D - String(value).length;
+    cols.forEach((c, i) => {
+      c.style.transitionDelay = (D - i) * 25 + 'ms';
+      c.style.transform = `translateY(${-+s[i] * 76}px)`;
+      c.classList.toggle('hide', i < lead);
+    });
+  };
+  render();
+  document.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
+    const a = b.dataset.add; value = a === 'rand' ? Math.floor(Math.random() * 99999) : Math.min(99999, value + +a); render();
+  });
+})();
+
+/* ---------- E4 Blur swap ---------- */
+(() => {
+  const t = document.getElementById('blur-title'), s = document.getElementById('blur-sub');
+  const words = [['Today', '3 tasks left'], ['Upcoming', '12 tasks this week'], ['Inbox', 'All clear'], ['Lisbon trip', '4 of 9 packed']];
+  let i = 0;
+  const swap = (el, text) => {
+    const out = el.animate([{ opacity: 1, filter: 'blur(0)', transform: 'none' }, { opacity: 0, filter: 'blur(8px)', transform: 'translateY(-4px) scale(0.98)' }], { duration: 180, easing: 'ease-in', fill: 'forwards' });
+    out.onfinish = () => { el.textContent = text; out.cancel();
+      el.animate([{ opacity: 0, filter: 'blur(8px)', transform: 'translateY(6px) scale(0.98)' }, { opacity: 1, filter: 'blur(0)', transform: 'none' }], { duration: DEFAULT.dur, easing: DEFAULT.easing }); };
+  };
+  document.getElementById('blur-btn').onclick = () => { i = (i + 1) % words.length; swap(t, words[i][0]); setTimeout(() => swap(s, words[i][1]), 50); };
+})();
+
+/* ---------- E5 Collapsing title ---------- */
+(() => {
+  const sc = document.getElementById('scroller'), bar = document.getElementById('navbar'), big = document.getElementById('bigtitle');
+  const items = ['Water the plants', 'Call Mum', 'Renew passport', 'Return the jacket', 'Book dentist', 'Send invoice #24', 'Fix the bike light', 'Buy coffee beans', 'Print boarding pass', 'Read chapter 4', 'Back up photos', 'Plan Sunday lunch'];
+  document.getElementById('longlist').innerHTML = items.map(n => `<div class="row"><span class="check">${ck}</span><span class="row-title">${n}</span></div>`).join('');
+  sc.onscroll = () => {
+    const y = sc.scrollTop;
+    bar.classList.toggle('scrolled', y > 34);
+    big.style.opacity = Math.max(0, 1 - y / 34);
+    big.style.transform = y < 0 ? `scale(${1 + Math.min(-y, 60) / 400})` : 'none';
+  };
+})();
+
+/* ---------- E6 Swipe to delete ---------- */
+(() => {
+  const list = document.getElementById('swipelist');
+  const items = ['Renew passport', 'Return the jacket', 'Book dentist', 'Send invoice #24'];
+  const S = DEFAULT;
+  const build = () => {
+    list.innerHTML = items.map(n => `<div class="swipe-row"><div class="swipe-action">Delete</div><div class="swipe-front"><span class="check"></span><span class="row-title">${n}</span></div></div>`).join('');
+    list.querySelectorAll('.swipe-row').forEach(bind);
+  };
+  const bind = (row) => {
+    const front = row.querySelector('.swipe-front'); let x0 = 0, x = 0, base = 0, drag = false;
+    const set = (v, anim) => {
+      const from = getComputedStyle(front).transform;
+      front.style.transform = `translateX(${v}px)`;
+      if (anim) front.animate([{ transform: from }, { transform: `translateX(${v}px)` }], { duration: S.dur, easing: S.easing });
+      base = v;
+    };
+    const remove = () => {
+      const w = row.offsetWidth;
+      front.animate([{ transform: getComputedStyle(front).transform }, { transform: `translateX(${-w}px)` }], { duration: 220, easing: 'ease-in', fill: 'forwards' })
+        .onfinish = () => row.animate([{ height: row.offsetHeight + 'px', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: S.dur, easing: S.easing, fill: 'forwards' }).onfinish = () => row.remove();
+    };
+    front.onpointerdown = e => { drag = true; x0 = e.clientX; front.setPointerCapture(e.pointerId); front.getAnimations().forEach(a => a.cancel()); };
+    front.onpointermove = e => {
+      if (!drag) return; let dx = base + e.clientX - x0;
+      if (dx > 0) dx = dx / 4; if (dx < -90) dx = -90 + (dx + 90) * 0.6; // rubber band
+      x = dx; front.style.transform = `translateX(${dx}px)`;
+    };
+    front.onpointerup = () => {
+      if (!drag) return; drag = false;
+      if (x < -row.offsetWidth * 0.55) remove(); else if (x < -45) set(-90, true); else set(0, true);
+      x = base;
+    };
+    row.querySelector('.swipe-action').onclick = remove;
+  };
+  document.getElementById('swipe-reset').onclick = build;
+  build();
+})();
+
+/* ---------- E7 Shake ---------- */
+(() => {
+  const i = document.getElementById('pw'), err = document.getElementById('pw-err');
+  document.getElementById('pw-btn').onclick = () => {
+    i.setAttribute('aria-invalid', 'true'); err.style.opacity = 1;
+    i.animate([0, -12, 11, -9, 7, -4, 2, 0].map(x => ({ transform: `translateX(${x}px)` })), { duration: 480, easing: 'cubic-bezier(0.3, 0, 0.3, 1)' });
+  };
+  i.oninput = () => { i.removeAttribute('aria-invalid'); err.style.opacity = 0; };
+})();
+
+/* ---------- E8 Liquid tabs ---------- */
+(() => {
+  const tabs = document.getElementById('tabs'), ind = document.getElementById('tab-ind'), title = document.getElementById('tab-title');
+  const btns = [...tabs.querySelectorAll('button')];
+  const fast = FAST, slow = SLOW;
+  const edges = b => ({ l: b.offsetLeft, r: tabs.clientWidth - b.offsetLeft - b.offsetWidth });
+  let cur = edges(btns[0]); ind.style.left = cur.l + 'px'; ind.style.right = cur.r + 'px';
+  addEventListener('resize', () => { const b = btns.find(x => x.getAttribute('aria-pressed') === 'true'); cur = edges(b); ind.style.left = cur.l + 'px'; ind.style.right = cur.r + 'px'; });
+  btns.forEach(b => b.onclick = () => {
+    const to = edges(b), right = to.l > cur.l;
+    ind.getAnimations().forEach(a => a.cancel());
+    ind.style.left = to.l + 'px'; ind.style.right = to.r + 'px';
+    ind.animate({ left: [cur.l + 'px', to.l + 'px'] }, { duration: (right ? slow : fast).dur, easing: (right ? slow : fast).easing });
+    ind.animate({ right: [cur.r + 'px', to.r + 'px'] }, { duration: (right ? fast : slow).dur, easing: (right ? fast : slow).easing });
+    cur = to;
+    btns.forEach(x => x.setAttribute('aria-pressed', x === b));
+    title.textContent = b.textContent;
+    title.animate([{ opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0)' }], { duration: 260, easing: 'ease-out' });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "graphite",
+  "displayName": "Graphite",
+  "version": "1.0.0",
+  "description": "A monotone, calm, Apple-simple design system for any UI work: web, Tailwind, React, React Native/Expo, SwiftUI, emails and slides.",
+  "author": {
+    "name": "Olger Chotza",
+    "url": "https://ochotzas.com"
+  },
+  "homepage": "https://ochotzas.com/skills/graphite",
+  "repository": "https://github.com/ochotzas/graphite",
+  "license": "Apache-2.0",
+  "keywords": ["design-system", "ui", "tokens", "swiftui", "tailwind", "react-native"]
+}

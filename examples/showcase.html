@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graphite Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<style>
+  /* ================= Graphite components (copy from here) ================= */
+
+  /* Type */
+  .title1 { font-size: var(--text-title1); line-height: var(--lh-title1); letter-spacing: var(--track-title1); font-weight: 700; margin: 0; }
+  .title2 { font-size: var(--text-title2); line-height: var(--lh-title2); letter-spacing: var(--track-title2); font-weight: 700; margin: 0; }
+  .display { font-size: var(--text-display); line-height: var(--lh-display); letter-spacing: var(--track-display); font-weight: 700; margin: 0; }
+  .headline { font-size: var(--text-headline); line-height: var(--lh-headline); font-weight: 600; margin: 0; }
+  .body { font-size: var(--text-body); line-height: var(--lh-body); margin: 0; }
+  .footnote { font-size: var(--text-footnote); line-height: var(--lh-footnote); font-weight: 500; color: var(--ink-2); margin: 0; }
+  .caption { font-size: var(--text-caption); line-height: var(--lh-caption); font-weight: 500; color: var(--ink-2); margin: 0; }
+  .stat { font-size: var(--text-stat); line-height: var(--lh-stat); letter-spacing: var(--track-stat); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* Island */
+  .island { background: var(--surface); border-radius: var(--radius-lg); }
+  .island-list { overflow: hidden; }               /* rows own their padding, so hover fills edge to edge */
+  .island-pad { padding: var(--space-5); }
+  .islands { display: flex; flex-direction: column; gap: var(--island-gap); }
+  .group-label { margin: 0 0 var(--space-2) var(--space-1); }
+
+  /* Row — the whole row is the hit area and the hover area */
+  .row { position: relative; display: flex; align-items: center; gap: var(--space-3); min-height: 52px; padding: 13px var(--space-4);
+    cursor: pointer; transition: background var(--dur-fast) var(--ease-out); }
+  .row:hover { background: var(--press); }
+  .row:active { background: var(--line); }
+  .row + .row::before { content: ""; position: absolute; top: 0; left: var(--space-4); right: 0; height: 1px; background: var(--line); transition: opacity var(--dur-fast); }
+  .row:hover::before, .row:hover + .row::before { opacity: 0; }   /* no divider cutting through a hovered row */
+  .row-text { flex: 1; min-width: 0; }
+  .row-title { display: block; font-weight: 500; line-height: 22px; transition: color var(--dur-base); }
+  .row-sub { display: block; font-size: var(--text-footnote); line-height: var(--lh-footnote); font-weight: 500; color: var(--ink-2); }
+  .row-trail { font-size: var(--text-footnote); font-weight: 500; color: var(--ink-2); font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: var(--space-1); }
+  .row.done .row-title { color: var(--ink-3); }
+  .chev { color: var(--ink-3); }
+
+  /* Check */
+  .check { flex: none; width: 24px; height: 24px; border-radius: var(--radius-full); border: 1.5px solid var(--ring); display: grid; place-items: center; color: var(--surface);
+    transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out); }
+  .check svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transform: scale(0.6); opacity: 0;
+    transition: transform var(--dur-spring) var(--spring), opacity var(--dur-fast); }
+  .done .check { background: var(--ink); border-color: var(--ink); }
+  .done .check svg { transform: scale(1); opacity: 1; }
+
+  /* Buttons */
+  .btn { height: 54px; padding: 0 var(--space-5); border: 0; border-radius: var(--radius-full); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    font: 600 17px/1 var(--font); text-decoration: none; transition: transform var(--dur-spring) var(--spring), background var(--dur-fast); -webkit-tap-highlight-color: transparent; }
+  .btn:active { transform: scale(var(--press-scale)); transition-duration: 90ms; }
+  .btn:disabled { opacity: 0.4; pointer-events: none; }
+  .btn-primary { background: var(--ink); color: var(--on-ink); }
+  .btn-secondary { background: var(--surface); color: var(--ink); }
+  .island .btn-secondary, .sheet .btn-secondary { background: var(--track); }
+  .btn-plain { background: none; color: var(--ink); padding: 0 var(--space-3); }
+  .btn-danger { color: var(--danger); }
+  .btn-block { width: 100%; }
+  .btn-md { height: 44px; font-size: 15px; }
+  .btn-sm { height: 36px; font-size: 15px; padding: 0 var(--space-4); }
+  .btn-icon { width: 44px; height: 44px; padding: 0; }
+  .icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+  /* Progress */
+  .progress { display: flex; gap: 3px; height: 8px; border-radius: var(--radius-full); background: var(--track); overflow: hidden; }
+  .progress i { flex: 1; border-radius: var(--radius-full); background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform var(--dur-spring) var(--spring); }
+  .progress i.on { transform: scaleX(1); }
+  .stat-line { display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-3); }
+
+  /* Inputs */
+  .field { display: flex; flex-direction: column; gap: var(--space-2); }
+  .field label { font-size: var(--text-footnote); font-weight: 500; color: var(--ink-2); margin-left: var(--space-1); }
+  .input { height: 52px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: inherit; outline: none; width: 100%; transition: box-shadow var(--dur-fast); }
+  .island .input { background: var(--bg); }
+  .input::placeholder { color: var(--ink-3); }
+  .input:focus { box-shadow: 0 0 0 2px var(--ink); }
+  .input[aria-invalid="true"] { box-shadow: 0 0 0 2px var(--danger); }
+  .help { font-size: var(--text-footnote); font-weight: 500; color: var(--ink-2); margin-left: var(--space-1); }
+  .help.error { color: var(--danger); }
+  .switch { appearance: none; margin: 0; flex: none; width: 51px; height: 31px; border-radius: var(--radius-full); background: var(--track); position: relative; cursor: pointer; transition: background var(--dur-base) var(--ease-out); }
+  .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.18); transition: transform var(--dur-spring) var(--spring); }
+  .switch:checked { background: var(--ink); }
+  .switch:checked::after { transform: translateX(20px); }
+
+  /* Liquid indicator — shared by segmented control and tab bar (see motion.md §8) */
+  .liquid { position: relative; isolation: isolate; }
+  .liquid-ind { position: absolute; z-index: -1; border-radius: var(--radius-full); pointer-events: none; }
+
+  .segmented { display: flex; padding: 3px; border-radius: var(--radius-full); background: var(--track); }
+  .segmented .liquid-ind { top: 3px; bottom: 3px; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .segmented button { flex: 1; height: 36px; border: 0; background: none; font: 500 15px var(--font); color: var(--ink-2); cursor: pointer; transition: color var(--dur-base); }
+  .segmented button[aria-pressed="true"] { color: var(--ink); font-weight: 600; }
+
+  /* Scroll-edge fade: content softly blurs + fades under the top/bottom edges instead of a hard cut */
+  .fade-scroll { position: relative; min-height: 0; --fade-bg: var(--bg); }
+  .island.fade-scroll { --fade-bg: var(--surface); overflow: hidden; }
+  .fade-scroll > .scroll { height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+  .fade-scroll > .scroll::-webkit-scrollbar { display: none; }
+  .fade-edge { position: absolute; left: 0; right: 0; height: var(--fade-size); z-index: 2; pointer-events: none; opacity: 0; transition: opacity var(--dur-base) var(--ease-out); }
+  .fade-edge::before { content: ""; position: absolute; inset: 0; backdrop-filter: blur(var(--fade-blur)); -webkit-backdrop-filter: blur(var(--fade-blur)); }
+  .fade-edge.top { top: 0; background: linear-gradient(var(--fade-bg), transparent); }
+  .fade-edge.top::before { mask-image: linear-gradient(#000 25%, transparent); -webkit-mask-image: linear-gradient(#000 25%, transparent); }
+  .fade-edge.bottom { bottom: 0; background: linear-gradient(transparent, var(--fade-bg)); }
+  .fade-edge.bottom::before { mask-image: linear-gradient(transparent, #000 75%); -webkit-mask-image: linear-gradient(transparent, #000 75%); }
+  .fade-scroll.can-up > .fade-edge.top, .fade-scroll.can-down > .fade-edge.bottom { opacity: 1; }
+
+  /* Avatar */
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--ink); color: var(--on-ink); display: grid; place-items: center; font-weight: 600; font-size: 14px; flex: none; }
+
+  /* Feedback */
+  .toast { display: inline-flex; align-items: center; gap: var(--space-3); height: 44px; padding: 0 var(--space-5); border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font-weight: 500; font-size: 15px; box-shadow: var(--shadow-float); }
+  .toast button { background: none; border: 0; color: inherit; font: 600 15px var(--font); opacity: 0.7; cursor: pointer; padding: 0; }
+  .empty { text-align: center; padding: var(--space-7) var(--space-5); display: flex; flex-direction: column; align-items: center; gap: var(--space-1); }
+  .empty .icon { width: 40px; height: 40px; color: var(--ink-3); stroke-width: 1.5; margin-bottom: var(--space-3); }
+  .empty .btn { margin-top: var(--space-4); }
+  .skel { background: var(--track); border-radius: var(--radius-full); animation: skel 1.4s ease-in-out infinite; }
+  @keyframes skel { 50% { opacity: 0.55; } }
+
+  /* Tab bar */
+  .tabbar { display: flex; padding: 6px 8px 22px; background: var(--surface); box-shadow: inset 0 1px 0 var(--line); }
+  .tabbar .liquid-ind { top: 6px; height: 50px; background: var(--bg); }
+  .tab { flex: 1; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font: 500 11px var(--font); color: var(--ink-2);
+    background: none; border: 0; cursor: pointer; transition: color var(--dur-base) var(--ease-out); -webkit-tap-highlight-color: transparent; }
+  .tab .icon { width: 24px; height: 24px; transition: fill var(--dur-base) var(--ease-out); }
+  .tab[aria-current] { color: var(--ink); }
+  .tab[aria-current] .icon { fill: currentColor; }
+
+  /* Sheet (mobile) → centered dialog (≥ 640px) */
+  .scrim { position: fixed; inset: 0; background: var(--scrim); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity var(--dur-base) var(--ease-out); z-index: 20; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--bg); border-radius: var(--radius-xl) var(--radius-xl) 0 0; box-shadow: var(--shadow-float);
+    padding: var(--space-3) var(--gutter) var(--space-6); transform: translateY(105%); pointer-events: none; transition: transform var(--dur-spring) var(--spring); }
+  .open .scrim { opacity: 1; pointer-events: auto; }
+  .open .sheet { transform: none; pointer-events: auto; }
+  .grabber { width: 36px; height: 5px; border-radius: var(--radius-full); background: var(--track); margin: 0 auto var(--space-4); }
+  .sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-5); }
+  @media (min-width: 640px) {
+    .sheet { left: 50%; right: auto; bottom: auto; top: 50%; width: min(440px, calc(100% - 48px)); border-radius: var(--radius-xl); padding: var(--space-5);
+      opacity: 0; transform: translate(-50%, -46%) scale(0.96); transition: transform var(--dur-spring) var(--spring), opacity var(--dur-base) var(--ease-out); }
+    .open .sheet { opacity: 1; transform: translate(-50%, -50%); }
+    .grabber { display: none; }
+  }
+
+  /* ================= Showcase page layout (not part of the system) ================= */
+  .page { max-width: var(--width-app); margin: 0 auto; padding: var(--space-8) var(--gutter) var(--space-9); }
+  .hero { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-7); }
+  .layout { display: grid; gap: var(--space-7); grid-template-columns: 1fr; align-items: start; }
+  @media (min-width: 900px) { .layout { grid-template-columns: 380px 1fr; } .phone-col { position: sticky; top: var(--space-5); } }
+  .phone { background: var(--bg); border-radius: var(--radius-xl); box-shadow: 0 0 0 1px var(--line), 0 40px 80px -40px rgba(0,0,0,0.35); overflow: hidden;
+    display: flex; flex-direction: column; height: 760px; max-width: 380px; margin: 0 auto; width: 100%; }
+  .phone-top { display: flex; justify-content: space-between; align-items: center; padding: var(--space-5) var(--gutter) var(--space-2); }
+  .phone .fade-scroll { flex: 1; }
+  .phone .scroll > div { padding: var(--space-2) var(--gutter) var(--space-5); }
+  .phone .title1 { margin-bottom: var(--space-5); }
+  .phone .cta { padding: 0 var(--gutter) var(--space-4); }
+  .sections { display: flex; flex-direction: column; gap: var(--space-7); min-width: 0; }
+  .grid2 { display: grid; gap: var(--island-gap); grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-items: start; }
+  .inline { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--space-3); }
+  .sw { border-radius: var(--radius-md); height: 64px; box-shadow: inset 0 0 0 1px var(--line); }
+  .theme-btn { position: fixed; right: var(--gutter); bottom: var(--gutter); z-index: 10; box-shadow: var(--shadow-float); }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="check" viewBox="0 0 12 12"><path d="M2.5 6.3l2.3 2.2L9.5 3.5"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+  <symbol id="home" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 01-1 1h-4.5v-5.5h-5V20H5a1 1 0 01-1-1z"/></symbol>
+  <symbol id="cal" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M8 3.5v4M16 3.5v4M4 10h16"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.75"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5z"/></symbol>
+  <symbol id="inbox" viewBox="0 0 24 24"><path d="M4 13.5l2.2-7.2A2 2 0 018.1 5h7.8a2 2 0 011.9 1.3l2.2 7.2V18a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M4 13.5h4.5l1 2h5l1-2H20"/></symbol>
+  <symbol id="moon" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 019.5 4.5a8 8 0 1010 10z"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+</svg>
+
+<main class="page">
+  <div class="hero">
+    <div><p class="footnote">Design system</p><h1 class="display">Graphite</h1></div>
+    <p class="body" style="max-width: 400px; color: var(--ink-2)">One hue, light islands on a grey table, and ink as the only accent.</p>
+  </div>
+
+  <div class="layout">
+    <!-- ===== Reference app: tabs, scroll-edge fade, sheet ===== -->
+    <div class="phone-col">
+      <div class="phone">
+        <div class="phone-top"><span class="footnote" id="kicker">Monday, 12 October</span><span class="avatar">O</span></div>
+        <div class="fade-scroll" data-fade><div class="fade-edge top"></div><div class="scroll"><div id="view"></div></div><div class="fade-edge bottom"></div></div>
+        <div class="cta"><button class="btn btn-primary btn-block" data-open>New task</button></div>
+        <nav class="tabbar liquid" id="tabbar">
+          <span class="liquid-ind"></span>
+          <button class="tab" data-tab="today" aria-current="page"><svg class="icon"><use href="#home"/></svg>Today</button>
+          <button class="tab" data-tab="upcoming"><svg class="icon"><use href="#cal"/></svg>Upcoming</button>
+          <button class="tab" data-tab="inbox"><svg class="icon"><use href="#inbox"/></svg>Inbox</button>
+          <button class="tab" data-tab="you"><svg class="icon"><use href="#user"/></svg>You</button>
+        </nav>
+      </div>
+      <p class="footnote" style="text-align:center;margin-top:var(--space-3)">Scroll the list · switch tabs · open “New task”</p>
+    </div>
+
+    <!-- ===== Parts ===== -->
+    <div class="sections">
+      <section>
+        <p class="caption group-label">Color</p>
+        <div class="island island-pad"><div class="swatches">
+          <div><div class="sw" style="background:var(--bg)"></div><p class="caption" style="margin-top:6px">bg</p></div>
+          <div><div class="sw" style="background:var(--surface)"></div><p class="caption" style="margin-top:6px">surface</p></div>
+          <div><div class="sw" style="background:var(--track)"></div><p class="caption" style="margin-top:6px">track</p></div>
+          <div><div class="sw" style="background:var(--ring)"></div><p class="caption" style="margin-top:6px">ring</p></div>
+          <div><div class="sw" style="background:var(--ink-3)"></div><p class="caption" style="margin-top:6px">ink-3</p></div>
+          <div><div class="sw" style="background:var(--ink-2)"></div><p class="caption" style="margin-top:6px">ink-2</p></div>
+          <div><div class="sw" style="background:var(--ink)"></div><p class="caption" style="margin-top:6px">ink</p></div>
+          <div><div class="sw" style="background:var(--danger)"></div><p class="caption" style="margin-top:6px">danger</p></div>
+        </div></div>
+      </section>
+
+      <section>
+        <p class="caption group-label">Type · Figtree</p>
+        <div class="island island-pad" style="display:flex;flex-direction:column;gap:var(--space-3)">
+          <p class="title1">Title one 38</p><p class="title2">Title two 24</p><p class="headline">Headline 18</p>
+          <p class="body">Body 16 — for reading. Hierarchy comes from size, weight and ink-2, never from color.</p>
+          <p class="footnote">Footnote 13 — dates, times, meta</p><p class="caption">Caption 12 — group labels</p>
+        </div>
+      </section>
+
+      <section>
+        <p class="caption group-label">Buttons</p>
+        <div class="inline">
+          <button class="btn btn-primary">Save changes</button><button class="btn btn-secondary">Duplicate</button>
+          <button class="btn btn-plain">Cancel</button><button class="btn btn-secondary btn-danger">Delete</button>
+        </div>
+        <div class="inline" style="margin-top:var(--space-3)">
+          <button class="btn btn-primary btn-md"><svg class="icon"><use href="#plus"/></svg>Add</button>
+          <button class="btn btn-secondary btn-sm">Compact</button>
+          <button class="btn btn-secondary btn-icon" aria-label="Add"><svg class="icon"><use href="#plus"/></svg></button>
+          <button class="btn btn-primary btn-md" disabled>Disabled</button>
+        </div>
+      </section>
+
+      <section>
+        <p class="caption group-label">Lists — hover fills the whole row</p>
+        <div class="grid2">
+          <div class="island island-list">
+            <label class="row"><span class="row-text"><span class="row-title">Daily summary</span><span class="row-sub">Every morning at 8:00</span></span><input type="checkbox" class="switch" checked></label>
+            <label class="row"><span class="row-text"><span class="row-title">Sounds</span></span><input type="checkbox" class="switch"></label>
+            <div class="row"><span class="row-text"><span class="row-title">Week starts on</span></span><span class="row-trail">Monday<svg class="icon chev"><use href="#chev"/></svg></span></div>
+          </div>
+          <div>
+            <div class="island fade-scroll" data-fade style="height: 264px"><div class="fade-edge top"></div><div class="scroll island-list" id="longlist"></div><div class="fade-edge bottom"></div></div>
+            <p class="footnote" style="margin:var(--space-2) 0 0 var(--space-1)">Scrolls inside the island — edges fade, no hard cut.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <p class="caption group-label">Inputs</p>
+        <div class="grid2">
+          <div class="field"><label for="e">Email</label><input class="input" id="e" placeholder="name@email.com"><span class="help">Use the email you sign in with.</span></div>
+          <div class="field"><label for="p">Password</label><input class="input" id="p" type="password" value="short" aria-invalid="true"><span class="help error">Use at least 8 characters.</span></div>
+        </div>
+        <div class="segmented liquid" role="group" style="margin-top:var(--space-4); max-width: 360px">
+          <span class="liquid-ind"></span>
+          <button aria-pressed="true">Day</button><button aria-pressed="false">Week</button><button aria-pressed="false">Month</button>
+        </div>
+      </section>
+
+      <section>
+        <p class="caption group-label">States</p>
+        <div class="grid2">
+          <div class="island empty">
+            <svg class="icon"><use href="#inbox"/></svg>
+            <p class="headline">Inbox zero</p><p class="footnote">New tasks you capture land here.</p>
+            <button class="btn btn-secondary btn-md">Add a task</button>
+          </div>
+          <div class="islands">
+            <div class="island island-list" aria-label="Loading">
+              <div class="row" style="cursor:default"><span class="skel" style="width:24px;height:24px"></span><span class="row-text"><span class="skel" style="display:block;height:10px;width:60%"></span></span></div>
+              <div class="row" style="cursor:default"><span class="skel" style="width:24px;height:24px"></span><span class="row-text"><span class="skel" style="display:block;height:10px;width:42%"></span></span></div>
+            </div>
+            <div><span class="toast">Task deleted <button>Undo</button></span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<button class="btn btn-secondary btn-icon theme-btn" id="theme" aria-label="Toggle dark mode"><svg class="icon"><use href="#moon"/></svg></button>
+
+<div id="sheet-root">
+  <div class="scrim" data-close></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="st">
+    <div class="grabber"></div>
+    <div class="sheet-head"><h2 class="headline" id="st">New task</h2><button class="btn btn-secondary btn-icon" style="width:32px;height:32px" data-close aria-label="Close"><svg class="icon" style="width:16px;height:16px"><use href="#x"/></svg></button></div>
+    <div class="islands">
+      <div class="field"><label for="tn">Task</label><input class="input" id="tn" placeholder="Water the plants"></div>
+      <div class="island island-list">
+        <div class="row"><span class="row-text"><span class="row-title">Date</span></span><span class="row-trail">Today<svg class="icon chev"><use href="#chev"/></svg></span></div>
+        <label class="row"><span class="row-text"><span class="row-title">Remind me</span></span><input type="checkbox" class="switch"></label>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-block" style="margin-top:var(--space-5)" data-add>Add task</button>
+  </div>
+</div>
+
+<script>
+  /* ---------- Motion tokens ---------- */
+  const css = getComputedStyle(document.documentElement);
+  const tok = (e, d) => ({ easing: css.getPropertyValue(e).trim(), duration: parseFloat(css.getPropertyValue(d)) });
+  const SPRING = tok('--spring', '--dur-spring'), FAST = tok('--spring-fast', '--dur-spring-fast'), SLOW = tok('--spring-slow', '--dur-spring-slow');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const svg = id => `<svg class="icon"><use href="#${id}"/></svg>`;
+  const ck = '<span class="check"><svg><use href="#check"/></svg></span>';
+
+  /* ---------- Scroll-edge fade ---------- */
+  const fades = new Set();
+  const updateFade = w => {
+    const s = w.querySelector(':scope > .scroll');
+    w.classList.toggle('can-up', s.scrollTop > 1);
+    w.classList.toggle('can-down', s.scrollTop + s.clientHeight < s.scrollHeight - 1);
+  };
+  document.querySelectorAll('[data-fade]').forEach(w => {
+    fades.add(w);
+    w.querySelector(':scope > .scroll').addEventListener('scroll', () => updateFade(w), { passive: true });
+    new ResizeObserver(() => updateFade(w)).observe(w.querySelector(':scope > .scroll'));
+  });
+  const refreshFades = () => fades.forEach(updateFade);
+
+  /* ---------- Liquid indicator (stretches as it moves) ---------- */
+  function liquid(group, items, isActive) {
+    const ind = group.querySelector('.liquid-ind');
+    const edges = el => ({ l: el.offsetLeft, r: group.clientWidth - el.offsetLeft - el.offsetWidth });
+    let cur;
+    const place = (el, animate) => {
+      const to = edges(el);
+      ind.getAnimations().forEach(a => a.cancel());
+      ind.style.left = to.l + 'px'; ind.style.right = to.r + 'px';
+      if (animate && cur && !reduce) {
+        const right = to.l > cur.l;
+        ind.animate({ left: [cur.l + 'px', to.l + 'px'] }, right ? SLOW : FAST);
+        ind.animate({ right: [cur.r + 'px', to.r + 'px'] }, right ? FAST : SLOW);
+      }
+      cur = to;
+    };
+    place(items.find(isActive), false);
+    addEventListener('resize', () => place(items.find(isActive), false));
+    return el => place(el, true);
+  }
+
+  /* ---------- Blur swap for content changes ---------- */
+  function blurSwap(el, change) {
+    if (reduce) { change(); return; }
+    const out = el.animate([{ opacity: 1, filter: 'blur(0)', transform: 'none' }, { opacity: 0, filter: 'blur(8px)', transform: 'translateY(-4px) scale(0.98)' }],
+      { duration: 160, easing: css.getPropertyValue('--ease-in').trim(), fill: 'forwards' });
+    out.onfinish = () => {
+      change(); out.cancel();
+      el.animate([{ opacity: 0, filter: 'blur(8px)', transform: 'translateY(8px) scale(0.98)' }, { opacity: 1, filter: 'blur(0)', transform: 'none' }], SPRING);
+    };
+  }
+
+  /* ---------- App data + views ---------- */
+  const tasks = [
+    ['Call the bank about the card', '9:00', true], ['Pick up film from the lab', '11:30', true], ['Send Marko the intro draft', '12:00', true],
+    ['Review Q3 budget', '14:00'], ['Run 5k by the river', '18:30'], ['Book flights to Lisbon', ''], ['Water the plants', ''],
+    ['Reply to Ana about Friday', ''], ['Order a new bike light', ''], ['Back up photos', ''],
+  ];
+  const upcoming = { Tomorrow: ['Dentist at 10:00', 'Send invoice #24', 'Call Mum'], Wednesday: ['Team review', 'Renew passport'], Friday: ['Dinner with Ana', 'Pack for Lisbon', 'Print boarding passes'] };
+  const views = {
+    today: { kicker: 'Monday, 12 October', html: () => `
+      <h2 class="title1">Today</h2>
+      <div class="islands">
+        <div class="island" style="padding:18px"><div class="stat-line"><span class="stat" id="count"></span><span class="footnote" style="font-size:16px" id="of"></span></div><div class="progress" id="bar"></div></div>
+        <div class="island island-list" id="tasks">${tasks.map(([n, t, d], i) => `<div class="row ${d ? 'done' : ''}" data-i="${i}">${ck}<span class="row-text"><span class="row-title">${n}</span></span><span class="row-trail">${t}</span></div>`).join('')}</div>
+      </div>` },
+    upcoming: { kicker: 'Next 7 days', html: () => `
+      <h2 class="title1">Upcoming</h2>
+      ${Object.entries(upcoming).map(([day, list]) => `<p class="caption group-label">${day}</p><div class="island island-list" style="margin-bottom:var(--space-5)">${list.map(n => `<div class="row">${ck}<span class="row-text"><span class="row-title">${n}</span></span></div>`).join('')}</div>`).join('')}` },
+    inbox: { kicker: 'Nothing waiting', html: () => `
+      <h2 class="title1">Inbox</h2>
+      <div class="island empty">${svg('inbox')}<p class="headline">Inbox zero</p><p class="footnote">New tasks you capture land here.</p></div>` },
+    you: { kicker: 'olgerdev', html: () => `
+      <h2 class="title1">You</h2>
+      <div class="islands">
+        <div class="island island-list">
+          <label class="row"><span class="row-text"><span class="row-title">Daily summary</span><span class="row-sub">Every morning at 8:00</span></span><input type="checkbox" class="switch" checked></label>
+          <label class="row"><span class="row-text"><span class="row-title">Sounds</span></span><input type="checkbox" class="switch"></label>
+        </div>
+        <div class="island island-list">
+          <div class="row"><span class="row-text"><span class="row-title">Week starts on</span></span><span class="row-trail">Monday<svg class="icon chev"><use href="#chev"/></svg></span></div>
+          <div class="row"><span class="row-text"><span class="row-title">Appearance</span></span><span class="row-trail">Automatic<svg class="icon chev"><use href="#chev"/></svg></span></div>
+        </div>
+      </div>` },
+  };
+
+  const view = document.getElementById('view'), kicker = document.getElementById('kicker'), scroller = view.parentElement;
+  const syncToday = () => {
+    const count = document.getElementById('count'); if (!count) return;
+    const done = tasks.filter(t => t[2]).length, bar = document.getElementById('bar');
+    count.textContent = done; document.getElementById('of').textContent = `of ${tasks.length} done`;
+    if (bar.children.length !== tasks.length) bar.innerHTML = tasks.map(() => '<i></i>').join('');
+    requestAnimationFrame(() => [...bar.children].forEach((s, j) => s.classList.toggle('on', j < done)));
+  };
+  const show = name => { view.innerHTML = views[name].html(); kicker.textContent = views[name].kicker; scroller.scrollTop = 0; syncToday(); refreshFades(); };
+  view.addEventListener('click', e => {
+    const r = e.target.closest('#tasks .row'); if (!r) return;
+    const t = tasks[r.dataset.i]; t[2] = !t[2]; r.classList.toggle('done', t[2]); syncToday();
+  });
+
+  const tabbar = document.getElementById('tabbar'), tabs = [...tabbar.querySelectorAll('.tab')];
+  const moveTab = liquid(tabbar, tabs, t => t.hasAttribute('aria-current'));
+  tabs.forEach(t => t.onclick = () => {
+    if (t.hasAttribute('aria-current')) { scroller.scrollTo({ top: 0, behavior: 'smooth' }); return; } // tap active tab = scroll to top
+    tabs.forEach(x => x.toggleAttribute('aria-current', x === t)); t.setAttribute('aria-current', 'page');
+    moveTab(t);
+    blurSwap(view, () => show(t.dataset.tab));
+    blurSwap(kicker, () => {});
+  });
+  show('today');
+
+  /* ---------- Segmented ---------- */
+  document.querySelectorAll('.segmented.liquid').forEach(seg => {
+    const btns = [...seg.querySelectorAll('button')];
+    const move = liquid(seg, btns, b => b.getAttribute('aria-pressed') === 'true');
+    btns.forEach(b => b.onclick = () => { btns.forEach(x => x.setAttribute('aria-pressed', x === b)); move(b); });
+  });
+
+  /* ---------- Long list in an island ---------- */
+  document.getElementById('longlist').innerHTML = ['Renew passport', 'Return the jacket', 'Book dentist', 'Send invoice #24', 'Fix the bike light', 'Buy coffee beans', 'Print boarding pass', 'Read chapter 4', 'Plan Sunday lunch', 'Call the plumber']
+    .map(n => `<div class="row">${ck}<span class="row-text"><span class="row-title">${n}</span></span></div>`).join('');
+  document.getElementById('longlist').addEventListener('click', e => { const r = e.target.closest('.row'); if (r) r.classList.toggle('done'); });
+  refreshFades();
+
+  /* ---------- Theme ---------- */
+  const root = document.documentElement;
+  try { const s = localStorage.getItem('graphite-theme'); if (s) root.dataset.theme = s; } catch {}
+  document.getElementById('theme').onclick = () => {
+    const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('graphite-theme', root.dataset.theme); } catch {}
+  };
+
+  /* ---------- Sheet / dialog ---------- */
+  const sheet = document.getElementById('sheet-root'), input = document.getElementById('tn');
+  const close = () => sheet.classList.remove('open');
+  document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => { sheet.classList.add('open'); setTimeout(() => input.focus(), 300); });
+  document.querySelectorAll('[data-close]').forEach(b => b.onclick = close);
+  document.querySelector('[data-add]').onclick = () => {
+    if (input.value.trim()) { tasks.push([input.value.trim(), '', false]); input.value = ''; if (document.getElementById('tasks')) show('today'); }
+    close();
+  };
+  addEventListener('keydown', e => e.key === 'Escape' && close());
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "@ochotzas/graphite",
+  "version": "1.0.0",
+  "description": "A monotone, calm, Apple-simple design system for any UI work, packaged as an agent skill.",
+  "license": "Apache-2.0",
+  "author": "Olger Chotza (https://ochotzas.com)",
+  "homepage": "https://ochotzas.com/skills/graphite",
+  "repository": "github:ochotzas/graphite",
+  "keywords": ["design-system", "design-tokens", "agent-skills", "claude-code"],
+  "exports": {
+    "./tokens.css": "./tokens/tokens.css",
+    "./tokens": "./tokens/tokens.ts",
+    "./package.json": "./package.json",
+    "./*": "./*"
+  }
+}

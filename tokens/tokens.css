@@ -1,0 +1,106 @@
+/* Graphite — design tokens. Source of truth. Keep tokens.ts in sync.
+   Monotone: every color is the same cool graphite hue (OKLCH h≈270, very low chroma).
+   There is no accent color — ink is the accent. */
+
+:root {
+  /* ---------- Color: light ---------- */
+  --bg:       #E8E9ED;  /* page — the "table" islands sit on */
+  --surface:  #F6F7F9;  /* islands: grouped lists, cards, sheets, inputs */
+  --press:    #ECEDF0;  /* pressed/hovered row inside an island */
+  --track:    #D3D6DC;  /* progress tracks, switch off, skeletons */
+  --line:     #E0E1E5;  /* dividers inside islands */
+  --ring:     #AEB1B9;  /* empty check circles, input borders */
+  --ink:      #2F333C;  /* text, icons, primary buttons, selected states */
+  --ink-2:    #63666F;  /* secondary text, meta */
+  --ink-3:    #9C9EA4;  /* completed/disabled text, placeholders */
+  --on-ink:   #F6F7F9;  /* text/icons on ink fills */
+  --danger:   #C4322B;  /* the ONLY non-graphite color: errors & destructive actions */
+
+  /* ---------- Typography ---------- */
+  --font: "Figtree", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /* Load: https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap */
+
+  --text-caption:  12px; --lh-caption: 16px;   /* 500 */
+  --text-footnote: 13px; --lh-footnote: 18px;  /* 500 — meta, times */
+  --text-body:     16px; --lh-body: 24px;      /* 400 paragraphs, 500 row titles */
+  --text-headline: 18px; --lh-headline: 24px;  /* 600 — island titles */
+  --text-title2:   24px; --lh-title2: 30px;  --track-title2: -0.02em;  /* 700 */
+  --text-title1:   38px; --lh-title1: 42px;  --track-title1: -0.03em;  /* 700 — screen title */
+  --text-display:  56px; --lh-display: 58px; --track-display: -0.04em; /* 700 — marketing only */
+  --text-stat:     34px; --lh-stat: 38px;    --track-stat: -0.03em;    /* 700 — big numbers */
+
+  /* ---------- Space (4pt grid) ---------- */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
+
+  /* ---------- Radius ---------- */
+  --radius-sm:   8px;   /* thumbnails, tags, small chips */
+  --radius-md:   14px;  /* inputs, segmented control, small tiles */
+  --radius-lg:   22px;  /* islands (the signature container) */
+  --radius-xl:   34px;  /* sheets, modals */
+  --radius-full: 999px; /* buttons, checks, avatars, progress */
+
+  /* ---------- Elevation (floating layers only) ---------- */
+  --shadow-float: 0 1px 2px rgba(47,51,60,0.06), 0 12px 32px rgba(47,51,60,0.12);
+  --scrim: rgba(15,15,17,0.36);
+
+  /* ---------- Motion: "Spring" feel (see motion.md) ---------- */
+  /* Default spring = stiffness 380, damping 30, mass 1 (~1.6% overshoot). Use with --dur-spring. */
+  --spring: linear(0, 0.058, 0.141, 0.277, 0.384, 0.52, 0.613, 0.721, 0.788, 0.86, 0.903, 0.946, 0.969, 0.991, 1.002, 1.011, 1.015, 1.016, 1.016, 1.015, 1.013, 1.011, 1.009, 1.007, 1.005, 1.004, 1.003, 1.002, 1.001, 1.001, 1, 1, 1);
+  --dur-spring: 470ms;
+  /* Liquid tabs: leading edge uses fast, trailing edge uses slow */
+  --spring-fast: linear(0, 0.049, 0.146, 0.267, 0.395, 0.518, 0.63, 0.726, 0.806, 0.87, 0.92, 0.957, 0.983, 1.001, 1.012, 1.019, 1.021, 1.022, 1.021, 1.019, 1.016, 1.013, 1.011, 1.008, 1.006, 1.004, 1.003, 1.002, 1.001, 1, 1, 1, 1);
+  --dur-spring-fast: 400ms;
+  --spring-slow: linear(0, 0.04, 0.149, 0.259, 0.373, 0.484, 0.609, 0.695, 0.768, 0.841, 0.887, 0.923, 0.95, 0.975, 0.988, 0.997, 1.005, 1.008, 1.009, 1.009, 1.009, 1.008, 1.007, 1.006, 1.005, 1.004, 1.003, 1.002, 1.002, 1.001, 1.001, 1, 1);
+  --dur-spring-slow: 570ms;
+  /* Non-moving changes (color, opacity) and exits */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --dur-fast: 120ms; --dur-base: 220ms;
+  --press-scale: 0.96;
+
+  /* ---------- Layout ---------- */
+  --width-read: 640px;
+  --width-app: 1120px;
+  --gutter: 20px;          /* 24 ≥ 640px, 32 ≥ 1024px */
+  --island-gap: 12px;      /* between stacked islands */
+  --fade-size: 40px;       /* scroll-edge fade height */
+  --fade-blur: 6px;        /* scroll-edge blur strength */
+  --tap: 44px;
+}
+
+@media (min-width: 640px)  { :root { --gutter: 24px; } }
+@media (min-width: 1024px) { :root { --gutter: 32px; } }
+
+/* ---------- Color: dark ---------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F0F11; --surface: #1B1C1F; --press: #232427; --track: #2C2E32; --line: #252629; --ring: #4B4D53;
+    --ink: #E2E4EB; --ink-2: #96989F; --ink-3: #5B5D63; --on-ink: #0F0F11; --danger: #FF6B61;
+    --shadow-float: 0 0 0 1px #252629, 0 12px 32px rgba(0,0,0,0.5); --scrim: rgba(0,0,0,0.55);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F0F11; --surface: #1B1C1F; --press: #232427; --track: #2C2E32; --line: #252629; --ring: #4B4D53;
+  --ink: #E2E4EB; --ink-2: #96989F; --ink-3: #5B5D63; --on-ink: #0F0F11; --danger: #FF6B61;
+  --shadow-float: 0 0 0 1px #252629, 0 12px 32px rgba(0,0,0,0.5); --scrim: rgba(0,0,0,0.55);
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+::selection { background: var(--track); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
