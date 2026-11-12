@@ -1,6 +1,7 @@
 /* Graphite — design tokens. Source of truth. Keep tokens.ts in sync.
-   Monotone: every color is the same cool graphite hue (OKLCH h≈270, very low chroma).
-   There is no accent color — ink is the accent. */
+   Neutrals are one cool graphite hue (OKLCH h≈270, very low chroma).
+   Ink carries emphasis. One soft accent, soft status colors and a category palette sit at the
+   same lightness and low chroma as graphite, so the page still reads as one calm tone. */
 
 :root {
   /* ---------- Color: light ---------- */
@@ -14,7 +15,20 @@
   --ink-2:    #63666F;  /* secondary text, meta */
   --ink-3:    #9C9EA4;  /* completed/disabled text, placeholders */
   --on-ink:   #F6F7F9;  /* text/icons on ink fills */
-  --danger:   #C4322B;  /* the ONLY non-graphite color: errors & destructive actions */
+  --danger:   #AB413A;  /* errors & destructive actions */
+
+  --accent:        #3D5F9E;
+  --accent-tint:   #D8E5FD;
+  --success:       #27713D;  --success-tint: #D5ECD9;
+  --warning:       #875300;  --warning-tint: #F4E1CC;
+  --danger-tint:   #FBDCD8;
+
+  --cat-slate: #5E8DBE; --cat-slate-tint: #D4E7FC;
+  --cat-sage:  #60996C; --cat-sage-tint:  #D5ECD9;
+  --cat-sand:  #A28545; --cat-sand-tint:  #EFE3CB;
+  --cat-clay:  #B7775B; --cat-clay-tint:  #FADED2;
+  --cat-rose:  #B77282; --cat-rose-tint:  #FADBE1;
+  --cat-lilac: #967BB5; --cat-lilac-tint: #EADFF8;
 
   /* ---------- Typography ---------- */
   --font: "Figtree", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
@@ -76,14 +90,24 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0F0F11; --surface: #1B1C1F; --press: #232427; --track: #2C2E32; --line: #252629; --ring: #4B4D53;
-    --ink: #E2E4EB; --ink-2: #96989F; --ink-3: #5B5D63; --on-ink: #0F0F11; --danger: #FF6B61;
+    --ink: #E2E4EB; --ink-2: #96989F; --ink-3: #5B5D63; --on-ink: #0F0F11; --danger: #F2897E;
+    --accent: #9EBEF8; --accent-tint: #202B3F; --success: #94CF9F; --success-tint: #1C3121; --warning: #E3B47D; --warning-tint: #382814; --danger-tint: #3D2320;
+    --cat-slate: #78A3CF; --cat-slate-tint: #1C2D3F; --cat-sage: #7AAD84; --cat-sage-tint: #1C3121; --cat-sand: #B59B63; --cat-sand-tint: #342A13;
+    --cat-clay: #C98F75; --cat-clay-tint: #3C251A; --cat-rose: #CA8A98; --cat-rose-tint: #3C2329; --cat-lilac: #AA92C7; --cat-lilac-tint: #30263B;
     --shadow-float: 0 0 0 1px #252629, 0 12px 32px rgba(0,0,0,0.5); --scrim: rgba(0,0,0,0.55);
   }
 }
 :root[data-theme="dark"] {
   --bg: #0F0F11; --surface: #1B1C1F; --press: #232427; --track: #2C2E32; --line: #252629; --ring: #4B4D53;
-  --ink: #E2E4EB; --ink-2: #96989F; --ink-3: #5B5D63; --on-ink: #0F0F11; --danger: #FF6B61;
+  --ink: #E2E4EB; --ink-2: #96989F; --ink-3: #5B5D63; --on-ink: #0F0F11; --danger: #F2897E;
+    --accent: #9EBEF8; --accent-tint: #202B3F; --success: #94CF9F; --success-tint: #1C3121; --warning: #E3B47D; --warning-tint: #382814; --danger-tint: #3D2320;
+    --cat-slate: #78A3CF; --cat-slate-tint: #1C2D3F; --cat-sage: #7AAD84; --cat-sage-tint: #1C3121; --cat-sand: #B59B63; --cat-sand-tint: #342A13;
+    --cat-clay: #C98F75; --cat-clay-tint: #3C251A; --cat-rose: #CA8A98; --cat-rose-tint: #3C2329; --cat-lilac: #AA92C7; --cat-lilac-tint: #30263B;
   --shadow-float: 0 0 0 1px #252629, 0 12px 32px rgba(0,0,0,0.5); --scrim: rgba(0,0,0,0.55);
+}
+
+@media (prefers-contrast: more) {
+  :root, :root:not([data-theme="light"]), :root[data-theme="dark"] { --ink-2: var(--ink); --line: var(--ring); }
 }
 
 /* ---------- Base ---------- */
@@ -99,8 +123,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-::selection { background: var(--track); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+::selection { background: var(--accent-tint); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
 }

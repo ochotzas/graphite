@@ -1,9 +1,9 @@
 # Graphite
 
-A monotone, calm, Apple-simple design system, packaged as an agent skill.
+A graphite-toned, calm, Apple-simple design system, packaged as an agent skill.
 By Olger Chotza — [ochotzas.com](https://ochotzas.com)
 
-One cool graphite hue. Light islands on a soft grey table, dark ink for everything that matters, Figtree set big and tight, and one spring for all motion. There is no accent color: **ink is the accent.**
+One cool graphite hue. Light islands on a soft grey table, dark ink for everything that matters, Figtree set big and tight, and one spring for all motion. **Ink carries emphasis**; soft colors at graphite's lightness only carry meaning (status, links, focus, categories).
 
 Coding agents load `SKILL.md` automatically for any UI work, follow its rules and tokens, and run its checklist before they call the work done. It covers web, Tailwind, React, React Native/Expo, SwiftUI, emails and slides.
 
@@ -36,7 +36,7 @@ For all UI work, read <path-to-graphite>/SKILL.md and follow it, including its c
 ### Just the tokens
 Install from GitHub, pinned to a release:
 ```sh
-npm install github:ochotzas/graphite#v1.0.0
+npm install github:ochotzas/graphite#v2.0.0
 ```
 Then `@import "@ochotzas/graphite/tokens.css";` in CSS, or `import { theme } from "@ochotzas/graphite/tokens";` in TS. Or copy `tokens/tokens.css` / `tokens/tokens.ts` into your project. `stacks.md` shows the setup for each stack.
 
@@ -51,10 +51,11 @@ Live at [ochotzas.com/skills/graphite](https://ochotzas.com/skills/graphite), wi
 | `tokens/` | Colors, type, spacing, radius, motion as CSS and TypeScript |
 | `foundations.md` | Color, type, spacing, radius, layout, icons |
 | `components.md` | Islands, rows, buttons, checks, inputs, navigation, sheets, states |
-| `motion.md` | The spring and 7 signature effects |
+| `motion.md` | The spring and 8 signature effects |
 | `stacks.md` | Setup for Tailwind, React, React Native/Expo, SwiftUI |
 | `voice.md` | How UI text is written |
 | `anti-patterns.md` | What agents typically get wrong |
+| `unslop.md` | Audit and fix passes for AI-looking UI, adapted from unslop |
 | `checklist.md` | The review run before UI work is finished |
 | `examples/` | Reference implementations to copy from |
 | `fonts/` | Figtree TTFs for native apps |
@@ -70,3 +71,4 @@ The version is in three places — the `SKILL.md` header (`metadata.version`), `
 ## License
 Apache 2.0, © 2026 Olger Chotza ([ochotzas.com](https://ochotzas.com)). See `LICENSE` and `NOTICE`.
 The Figtree fonts in `fonts/` are © The Figtree Project Authors, under the SIL Open Font License (`fonts/OFL.txt`).
+`unslop.md` is adapted from [unslop](https://github.com/heydamir/unslop) by Damir Sokolovsky ([@heydamir](https://x.com/heydamir)), under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

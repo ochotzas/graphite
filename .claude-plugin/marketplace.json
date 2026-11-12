@@ -9,7 +9,7 @@
     {
       "name": "graphite",
       "source": "./",
-      "description": "A monotone, calm, Apple-simple design system for any UI work."
+      "description": "A graphite-toned, calm, Apple-simple design system for any UI work."
     }
   ]
 }

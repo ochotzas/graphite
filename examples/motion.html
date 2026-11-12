@@ -61,6 +61,8 @@
   .stack { display: flex; flex-direction: column; gap: 10px; }
   .stat-line { display: flex; align-items: baseline; gap: 6px; }
   .stat { font-size: 30px; line-height: 34px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; display: inline-block; }
+  .roll { display: inline-grid; overflow: hidden; vertical-align: bottom; }
+  .roll > span { grid-area: 1 / 1; }
   .bottom { margin-top: auto; padding-top: 14px; }
 
   .scrim { position: absolute; inset: 0; background: var(--scrim); opacity: 0; pointer-events: none; transition: opacity var(--dur, 300ms) ease-out; z-index: 4; }
@@ -69,9 +71,12 @@
   .open > .scrim { opacity: 1; pointer-events: auto; }
   .open > .sheet { transform: none; }
   .grabber { width: 34px; height: 5px; border-radius: 99px; background: var(--track); margin: 0 auto 14px; }
+  .sheet { touch-action: none; cursor: grab; }
+  .sheet input, .sheet button { cursor: auto; }
+  .stage.dragging .sheet, .stage.dragging > .scrim, .stage.dragging .screen { transition: none; cursor: grabbing; }
   .sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-weight: 600; font-size: 17px; }
   .input { height: 48px; padding: 0 14px; border: 0; border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; outline: none; width: 100%; transition: box-shadow 150ms; }
-  .input:focus { box-shadow: 0 0 0 2px var(--ink); }
+  .input:focus { box-shadow: 0 0 0 2px var(--accent); }
   .input[aria-invalid="true"] { box-shadow: 0 0 0 2px var(--danger); }
   .toast { position: absolute; left: 50%; bottom: 82px; z-index: 3; display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 18px; border-radius: 99px; background: var(--ink); color: var(--on-ink);
     font-size: 14px; font-weight: 500; white-space: nowrap; box-shadow: var(--shadow-float); transform: translate(-50%, 160%); opacity: 0;
@@ -112,10 +117,10 @@
   .swipe-front:active { cursor: grabbing; }
 
   /* ---------- E8 Liquid tabs ---------- */
-  .tabs { position: relative; display: flex; padding: 4px; border-radius: 99px; background: var(--surface); }
+  .tabs { position: relative; display: flex; padding: 4px; border-radius: 99px; background: var(--track); }
   .tabs button { position: relative; z-index: 1; flex: 1; height: 40px; border: 0; background: none; font: 500 14px var(--font); color: var(--ink-2); cursor: pointer; transition: color 200ms; }
-  .tabs button[aria-pressed="true"] { color: var(--on-ink); font-weight: 600; }
-  .tab-ind { position: absolute; top: 4px; bottom: 4px; border-radius: 99px; background: var(--ink); }
+  .tabs button[aria-pressed="true"] { color: var(--ink); font-weight: 600; }
+  .tab-ind { position: absolute; top: 4px; bottom: 4px; border-radius: 99px; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
   .tabbar { position: absolute; left: 14px; right: 14px; bottom: 16px; }
 </style>
 </head>
@@ -140,7 +145,7 @@
   <div class="grid" id="effects">
 
     <section class="card">
-      <header><p class="label"><b>1</b>Push back</p><p class="footnote">Opening a sheet pushes the screen back, like iOS modals.</p></header>
+      <header><p class="label"><b>1</b>Push back</p><p class="footnote">Opening a sheet pushes the screen back, like iOS modals. Drag the sheet down to dismiss it.</p></header>
       <div class="stage short e1" id="e1">
         <div class="screen">
           <div class="top"><span class="footnote">Monday, 12 October</span><span class="avatar">O</span></div>
@@ -150,6 +155,20 @@
         </div>
         <div class="scrim" data-close></div>
         <div class="sheet"><div class="grabber"></div><div class="sheet-head">New task<button class="btn btn-secondary btn-sm" data-close>Done</button></div><input class="input" placeholder="Water the plants"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <header><p class="label"><b>2</b>Drag to dismiss</p><p class="footnote">Grab the sheet and pull it down. Past a third, or with a flick, it closes; otherwise it springs back.</p></header>
+      <div class="stage short e1 open">
+        <div class="screen">
+          <div class="top"><span class="footnote">Monday, 12 October</span><span class="avatar">O</span></div>
+          <p class="title">Today</p>
+          <div class="island island-list"><div class="row"><span class="check"></span><span class="row-title">Review Q3 budget</span></div><div class="row"><span class="check"></span><span class="row-title">Run 5k by the river</span></div></div>
+          <div class="bottom"><button class="btn btn-primary btn-block" data-open>Open sheet</button></div>
+        </div>
+        <div class="scrim" data-close></div>
+        <div class="sheet"><div class="grabber"></div><div class="sheet-head">Drag me down<button class="btn btn-secondary btn-sm" data-close>Done</button></div><p class="footnote">The screen behind comes forward as you pull.</p></div>
       </div>
     </section>
 
@@ -224,6 +243,22 @@ const DEFAULT = { ...token('--spring', '--dur-spring'), pop: 0.6, blur: 0 };
 const FAST = token('--spring-fast', '--dur-spring-fast'), SLOW = token('--spring-slow', '--dur-spring-slow');
 const FEELS = [{ k: '✓', name: 'Spring', desc: 'Tap tasks and “New task” — the sheet uses Push back.', ...DEFAULT }];
 const ck = '<svg><use href="#ck"/></svg>';
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function rollNumber(el, value, spring) {
+  const current = [...el.children].filter(c => !c.dataset.leaving).pop();
+  if (current.textContent === String(value)) return;
+  if (!spring || reduceMotion) { el.innerHTML = `<span>${value}</span>`; return; }
+  const up = +value > +current.textContent;
+  const next = document.createElement('span'); next.textContent = value;
+  el.appendChild(next);
+  current.dataset.leaving = 'true';
+  current.getAnimations().forEach(a => a.pause());
+  const from = getComputedStyle(current);
+  current.animate([{ transform: from.transform === 'none' ? 'none' : from.transform, opacity: from.opacity, filter: from.filter === 'none' ? 'blur(0)' : from.filter },
+    { transform: `translateY(${up ? -70 : 70}%)`, opacity: 0, filter: 'blur(3px)' }],
+    { duration: spring.dur * 0.55, easing: css.getPropertyValue('--ease-out').trim(), fill: 'forwards' }).onfinish = () => current.remove();
+  next.animate([{ transform: `translateY(${up ? 70 : -70}%)`, opacity: 0, filter: 'blur(3px)' }, { transform: 'none', opacity: 1, filter: 'blur(0)' }], { duration: spring.dur, easing: spring.easing });
+}
 
 /* ---------- Part 1: feels ---------- */
 const TASKS = [['Call the bank', '9:00', 1], ['Pick up film', '11:30', 1], ['Review Q3 budget', '14:00', 0], ['Run 5k by the river', '18:30', 0], ['Book flights', '', 0]];
@@ -236,7 +271,7 @@ feelsEl.innerHTML = FEELS.map(f => `
         <div class="top"><span class="footnote">Monday, 12 October</span><span class="avatar">O</span></div>
         <p class="title">Today</p>
         <div class="stack">
-          <div class="island" style="padding:16px"><div class="stat-line"><span class="stat"><span class="n">2</span></span><span class="footnote" style="font-size:15px">of 5 done</span></div><div class="progress">${TASKS.map(() => '<i></i>').join('')}</div></div>
+          <div class="island" style="padding:16px"><div class="stat-line"><span class="stat"><span class="n roll"><span>2</span></span></span><span class="footnote" style="font-size:15px">of 5 done</span></div><div class="progress">${TASKS.map(() => '<i></i>').join('')}</div></div>
           <div class="island island-list">${TASKS.map(([n, t, d]) => `<div class="row ${d ? 'done' : ''}"><span class="check">${ck}</span><span class="row-title">${n}</span><span class="row-trail">${t}</span></div>`).join('')}</div>
         </div>
         <div class="bottom"><button class="btn btn-primary btn-block" data-open>New task</button></div>
@@ -255,10 +290,7 @@ document.querySelectorAll('.feel').forEach(stage => {
   const sync = (animate) => {
     const done = stage.querySelectorAll('.row.done').length;
     segs.forEach((s, i) => s.classList.toggle('on', i < done));
-    if (n.textContent != done) {
-      const up = done > +n.textContent; n.textContent = done;
-      if (animate) n.animate([{ transform: `translateY(${up ? 60 : -60}%)`, opacity: 0, filter: `blur(${f.blur}px)` }, { transform: 'none', opacity: 1, filter: 'blur(0)' }], { duration: f.dur, easing: f.easing });
-    }
+    rollNumber(n, done, animate ? f : null);
   };
   stage.toggleRow = (row) => {
     row.classList.toggle('done');
@@ -274,6 +306,48 @@ document.querySelectorAll('.feel').forEach(stage => {
 document.addEventListener('click', e => {
   const o = e.target.closest('[data-open]'); if (o) o.closest('.stage').classList.add('open');
   const c = e.target.closest('[data-close]'); if (c) c.closest('.stage').classList.remove('open');
+});
+
+document.querySelectorAll('.stage .sheet').forEach(panel => {
+  const stage = panel.closest('.stage'), scrim = stage.querySelector(':scope > .scrim'), screen = stage.classList.contains('e1') ? stage.querySelector('.screen') : null;
+  let startY = 0, lastY = 0, lastT = 0, velocity = 0, offset = 0, dragging = false;
+  const resist = dy => dy >= 0 ? dy : -Math.sqrt(-dy) * 4;
+  const paint = () => {
+    const progress = Math.min(1, Math.max(0, offset / panel.offsetHeight));
+    panel.style.transform = `translateY(${resist(offset)}px)`;
+    scrim.style.opacity = String(1 - progress);
+    if (screen) {
+      screen.style.transform = `translateY(${14 * (1 - progress)}px) scale(${0.92 + 0.08 * progress})`;
+      screen.style.borderRadius = `${26 * (1 - progress)}px`;
+      screen.style.filter = `brightness(${0.75 + 0.25 * progress})`;
+    }
+  };
+  const clear = () => {
+    stage.classList.remove('dragging');
+    [panel, scrim, screen].forEach(el => el && el.removeAttribute('style'));
+  };
+  panel.addEventListener('pointerdown', e => {
+    if (!stage.classList.contains('open') || e.button !== 0 || e.target.closest('input, button')) return;
+    dragging = true; startY = lastY = e.clientY; lastT = e.timeStamp; velocity = 0; offset = 0;
+    panel.setPointerCapture(e.pointerId);
+    stage.classList.add('dragging');
+  });
+  panel.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    velocity = 0.8 * ((e.clientY - lastY) / Math.max(1, e.timeStamp - lastT)) + 0.2 * velocity;
+    lastY = e.clientY; lastT = e.timeStamp; offset = e.clientY - startY;
+    paint();
+  });
+  const end = () => {
+    if (!dragging) return;
+    dragging = false;
+    const dismiss = offset > panel.offsetHeight / 3 || (velocity > 0.5 && offset > 0);
+    panel.getBoundingClientRect();
+    clear();
+    if (dismiss) stage.classList.remove('open');
+  };
+  panel.addEventListener('pointerup', end);
+  panel.addEventListener('pointercancel', end);
 });
 
 document.getElementById('playall').onclick = () => {

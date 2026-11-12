@@ -78,7 +78,7 @@
   .input { height: 52px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: inherit; outline: none; width: 100%; transition: box-shadow var(--dur-fast); }
   .island .input { background: var(--bg); }
   .input::placeholder { color: var(--ink-3); }
-  .input:focus { box-shadow: 0 0 0 2px var(--ink); }
+  .input:focus { box-shadow: 0 0 0 2px var(--accent); }
   .input[aria-invalid="true"] { box-shadow: 0 0 0 2px var(--danger); }
   .help { font-size: var(--text-footnote); font-weight: 500; color: var(--ink-2); margin-left: var(--space-1); }
   .help.error { color: var(--danger); }
@@ -132,11 +132,14 @@
 
   /* Sheet (mobile) → centered dialog (≥ 640px) */
   .scrim { position: fixed; inset: 0; background: var(--scrim); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity var(--dur-base) var(--ease-out); z-index: 20; }
+  @media (prefers-reduced-transparency: reduce) { .scrim { backdrop-filter: none; -webkit-backdrop-filter: none; } .fade-edge::before { display: none; } }
   .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--bg); border-radius: var(--radius-xl) var(--radius-xl) 0 0; box-shadow: var(--shadow-float);
     padding: var(--space-3) var(--gutter) var(--space-6); transform: translateY(105%); pointer-events: none; transition: transform var(--dur-spring) var(--spring); }
   .open .scrim { opacity: 1; pointer-events: auto; }
   .open .sheet { transform: none; pointer-events: auto; }
   .grabber { width: 36px; height: 5px; border-radius: var(--radius-full); background: var(--track); margin: 0 auto var(--space-4); }
+  .sheet.dragging, .sheet.dragging ~ .scrim, .scrim.dragging { transition: none; }
+  @media (max-width: 639px) { .sheet { touch-action: none; cursor: grab; } .sheet.dragging { cursor: grabbing; } .sheet input, .sheet button, .sheet label { cursor: auto; } }
   .sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-5); }
   @media (min-width: 640px) {
     .sheet { left: 50%; right: auto; bottom: auto; top: 50%; width: min(440px, calc(100% - 48px)); border-radius: var(--radius-xl); padding: var(--space-5);
@@ -162,6 +165,95 @@
   .inline { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
   .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--space-3); }
   .sw { border-radius: var(--radius-md); height: 64px; box-shadow: inset 0 0 0 1px var(--line); }
+  .sw-pair { display: grid; grid-template-rows: 1fr 1fr; overflow: hidden; }
+  .menu-anchor { position: relative; display: inline-block; }
+  .menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; min-width: 200px; max-width: min(280px, calc(100vw - 2 * var(--gutter))); padding: 6px;
+    background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-float); transform-origin: top left; }
+  .menu.end { left: auto; right: 0; transform-origin: top right; }
+  .menu.up { top: auto; bottom: calc(100% + 6px); transform-origin: bottom left; }
+  .menu.end.up { transform-origin: bottom right; }
+  .menu.fixed { position: fixed; top: auto; left: auto; }
+  .menu.full { width: 100%; max-width: none; }
+  .menu-item { display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 10px; border: 0; border-radius: var(--radius-sm); background: none;
+    color: var(--ink); font: 400 16px var(--font); text-align: left; cursor: pointer; outline: none; transition: background var(--dur-fast) var(--ease-out); }
+  .menu-item .icon { color: var(--ink-2); }
+  .menu-item:hover, .menu-item:focus-visible { background: var(--press); }
+  .menu-item .tick { margin-left: auto; width: 14px; height: 14px; fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
+  .menu-item[aria-checked="true"] .tick { visibility: visible; }
+  .menu-item.destructive, .menu-item.destructive .icon { color: var(--danger); }
+  .menu-sep { height: 1px; margin: 6px 4px; background: var(--line); }
+
+  .select { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); width: 100%; height: 52px; padding: 0 var(--space-3) 0 var(--space-4); border: 0;
+    border-radius: var(--radius-md); background: var(--bg); color: var(--ink); font: 400 16px var(--font); cursor: pointer; outline: none; transition: box-shadow var(--dur-fast); }
+  .select:focus-visible { box-shadow: 0 0 0 2px var(--accent); outline: none; }
+  .select .icon { color: var(--ink-3); }
+
+  .tip { position: relative; }
+  .tip::after { content: attr(data-tip); position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%); padding: 6px 10px; border-radius: var(--radius-sm);
+    background: var(--ink); color: var(--on-ink); font: 500 13px/18px var(--font); white-space: nowrap; pointer-events: none; opacity: 0; z-index: 5;
+    transition: opacity var(--dur-fast) var(--ease-out); }
+  .tip:hover::after { opacity: 1; transition-delay: 500ms; }
+  .tip:focus-visible::after { opacity: 1; transition-delay: 0ms; }
+  .tip[aria-expanded="true"]::after { opacity: 0; transition-delay: 0ms; }
+  @media (hover: none) { .tip::after { display: none; } }
+
+  .slider { --p: 50%; appearance: none; -webkit-appearance: none; flex: 1; min-width: 0; height: 28px; margin: 0; background: none; cursor: pointer; }
+  .slider::-webkit-slider-runnable-track { height: 6px; border-radius: var(--radius-full); background: linear-gradient(var(--ink), var(--ink)) 0 / var(--p) 100% no-repeat, var(--track); }
+  .slider::-moz-range-track { height: 6px; border-radius: var(--radius-full); background: var(--track); }
+  .slider::-moz-range-progress { height: 6px; border-radius: var(--radius-full); background: var(--ink); }
+  .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: -11px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(0,0,0,0.06); }
+  .slider::-moz-range-thumb { width: 28px; height: 28px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
+  .slider:focus-visible { outline: none; }
+  .slider:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px var(--accent), 0 2px 6px rgba(0,0,0,0.18); }
+
+  .stepper { display: inline-flex; align-items: center; height: 36px; padding: 0 2px; border-radius: var(--radius-full); background: var(--track); }
+  .stepper button { width: 36px; height: 32px; border: 0; border-radius: var(--radius-full); background: none; color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+  .stepper button:disabled { color: var(--ink-3); cursor: default; }
+  .stepper button:active:not(:disabled) { background: var(--press); }
+  .stepper .icon { width: 18px; height: 18px; }
+  .stepper output { min-width: 32px; text-align: center; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .roll { display: inline-grid; overflow: hidden; vertical-align: bottom; }
+  .roll > span { grid-area: 1 / 1; }
+
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); }
+  .cal-nav { display: flex; gap: var(--space-1); }
+  .cal-nav .btn-icon { width: 36px; height: 36px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 2px; text-align: center; }
+  .cal-grid .wd { height: 28px; font-size: var(--text-caption); line-height: 28px; font-weight: 500; color: var(--ink-2); }
+  .cal-day { justify-self: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: none; color: var(--ink); font: 400 16px var(--font); font-variant-numeric: tabular-nums; cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast); }
+  .cal-day:hover { background: var(--press); }
+  .cal-day.today { color: var(--accent); font-weight: 600; }
+  .cal-day[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 0; border-radius: var(--radius-full); background: var(--track); color: var(--ink);
+    font: 500 13px var(--font); white-space: nowrap; }
+  button.chip { cursor: pointer; transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast); }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dot); }
+  .chip .icon { width: 14px; height: 14px; color: var(--ink-2); margin-right: -2px; }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+
+  .badge-wrap { position: relative; display: inline-grid; }
+  .badge { position: absolute; top: 2px; right: 0; min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink);
+    font: 600 12px/18px var(--font); font-variant-numeric: tabular-nums; text-align: center; box-shadow: 0 0 0 2px var(--bg); }
+  .badge.dot { min-width: 8px; width: 8px; height: 8px; padding: 0; top: 8px; right: 8px; }
+
+  .banner { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--tint); color: var(--ink); }
+  .banner > .icon { color: var(--tone); margin-top: 2px; }
+  .banner-text { flex: 1; min-width: 0; }
+  .banner-title { display: block; font-weight: 500; }
+  .banner .btn-plain { height: 24px; padding: 0; font-size: 15px; align-self: center; }
+  .banner.info { --tint: var(--accent-tint); --tone: var(--accent); }
+  .banner.success { --tint: var(--success-tint); --tone: var(--success); }
+  .banner.warning { --tint: var(--warning-tint); --tone: var(--warning); }
+  .banner.danger { --tint: var(--danger-tint); --tone: var(--danger); }
+
+  .link { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); transition: text-decoration-color var(--dur-fast); }
+  .link:hover { text-decoration-color: var(--accent); }
+  .row-lead { color: var(--ink-2); }
+
   .theme-btn { position: fixed; right: var(--gutter); bottom: var(--gutter); z-index: 10; box-shadow: var(--shadow-float); }
 </style>
 </head>
@@ -177,12 +269,29 @@
   <symbol id="inbox" viewBox="0 0 24 24"><path d="M4 13.5l2.2-7.2A2 2 0 018.1 5h7.8a2 2 0 011.9 1.3l2.2 7.2V18a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M4 13.5h4.5l1 2h5l1-2H20"/></symbol>
   <symbol id="moon" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 019.5 4.5a8 8 0 1010 10z"/></symbol>
   <symbol id="x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="share" viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7M16 6l-4-4-4 4M12 2v13"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 003.4 0"/></symbol>
+  <symbol id="lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 018 0v4"/></symbol>
+  <symbol id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2.5 12h2M19.5 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></symbol>
+  <symbol id="chev-down" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol>
+  <symbol id="chev-left" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol>
+  <symbol id="updown" viewBox="0 0 24 24"><path d="M8 15l4 4 4-4M8 9l4-4 4 4"/></symbol>
+  <symbol id="sort" viewBox="0 0 24 24"><path d="M3 16l4 4 4-4M7 20V4M21 8l-4-4-4 4M17 4v16"/></symbol>
+  <symbol id="more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+  <symbol id="pencil" viewBox="0 0 24 24"><path d="M16.5 3.5a2.1 2.1 0 013 3L7.5 18.5 3 20l1.5-4.5z"/></symbol>
+  <symbol id="copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4.5A1.5 1.5 0 013 13.5v-9A1.5 1.5 0 014.5 3h9A1.5 1.5 0 0115 4.5V5"/></symbol>
+  <symbol id="trash" viewBox="0 0 24 24"><path d="M4 6.5h16M18 6.5V19a2 2 0 01-2 2H8a2 2 0 01-2-2V6.5M9 6.5V4.5A1.5 1.5 0 0110.5 3h3A1.5 1.5 0 0115 4.5v2"/></symbol>
+  <symbol id="minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4.5M12 8h.01"/></symbol>
+  <symbol id="warn" viewBox="0 0 24 24"><path d="M10.3 4.2L2.6 17.5A2 2 0 004.3 20.5h15.4a2 2 0 001.7-3L13.7 4.2a2 2 0 00-3.4 0z"/><path d="M12 9.5v4M12 17h.01"/></symbol>
+  <symbol id="ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.2l2.3 2.3 4.7-4.8"/></symbol>
+  <symbol id="err" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16h.01"/></symbol>
 </svg>
 
 <main class="page">
   <div class="hero">
     <div><p class="footnote">Design system</p><h1 class="display">Graphite</h1></div>
-    <p class="body" style="max-width: 400px; color: var(--ink-2)">One hue, light islands on a grey table, and ink as the only accent.</p>
+    <p class="body" style="max-width: 400px; color: var(--ink-2)">Light islands on a grey table, ink for emphasis, soft color only for meaning.</p>
   </div>
 
   <div class="layout">
@@ -215,7 +324,22 @@
           <div><div class="sw" style="background:var(--ink-3)"></div><p class="caption" style="margin-top:6px">ink-3</p></div>
           <div><div class="sw" style="background:var(--ink-2)"></div><p class="caption" style="margin-top:6px">ink-2</p></div>
           <div><div class="sw" style="background:var(--ink)"></div><p class="caption" style="margin-top:6px">ink</p></div>
-          <div><div class="sw" style="background:var(--danger)"></div><p class="caption" style="margin-top:6px">danger</p></div>
+        </div></div>
+        <p class="caption group-label" style="margin-top:var(--space-5)">Soft colors — color and its tint, only for meaning</p>
+        <div class="island island-pad"><div class="swatches">
+          <div><div class="sw sw-pair"><span style="background:var(--accent)"></span><span style="background:var(--accent-tint)"></span></div><p class="caption" style="margin-top:6px">accent</p></div>
+          <div><div class="sw sw-pair"><span style="background:var(--success)"></span><span style="background:var(--success-tint)"></span></div><p class="caption" style="margin-top:6px">success</p></div>
+          <div><div class="sw sw-pair"><span style="background:var(--warning)"></span><span style="background:var(--warning-tint)"></span></div><p class="caption" style="margin-top:6px">warning</p></div>
+          <div><div class="sw sw-pair"><span style="background:var(--danger)"></span><span style="background:var(--danger-tint)"></span></div><p class="caption" style="margin-top:6px">danger</p></div>
+        </div></div>
+        <p class="caption group-label" style="margin-top:var(--space-5)">Categories — picked by people, and chart series</p>
+        <div class="island island-pad"><div class="swatches">
+          <div><div class="sw sw-pair"><span style="background:var(--cat-slate)"></span><span style="background:var(--cat-slate-tint)"></span></div><p class="caption" style="margin-top:6px">slate</p></div>
+          <div><div class="sw sw-pair"><span style="background:var(--cat-sage)"></span><span style="background:var(--cat-sage-tint)"></span></div><p class="caption" style="margin-top:6px">sage</p></div>
+          <div><div class="sw sw-pair"><span style="background:var(--cat-sand)"></span><span style="background:var(--cat-sand-tint)"></span></div><p class="caption" style="margin-top:6px">sand</p></div>
+          <div><div class="sw sw-pair"><span style="background:var(--cat-clay)"></span><span style="background:var(--cat-clay-tint)"></span></div><p class="caption" style="margin-top:6px">clay</p></div>
+          <div><div class="sw sw-pair"><span style="background:var(--cat-rose)"></span><span style="background:var(--cat-rose-tint)"></span></div><p class="caption" style="margin-top:6px">rose</p></div>
+          <div><div class="sw sw-pair"><span style="background:var(--cat-lilac)"></span><span style="background:var(--cat-lilac-tint)"></span></div><p class="caption" style="margin-top:6px">lilac</p></div>
         </div></div>
       </section>
 
@@ -266,6 +390,109 @@
         <div class="segmented liquid" role="group" style="margin-top:var(--space-4); max-width: 360px">
           <span class="liquid-ind"></span>
           <button aria-pressed="true">Day</button><button aria-pressed="false">Week</button><button aria-pressed="false">Month</button>
+        </div>
+      </section>
+
+      <section>
+        <p class="caption group-label">Menus & pickers</p>
+        <div class="islands">
+          <div class="inline">
+            <div class="menu-anchor">
+              <button class="btn btn-secondary btn-md" data-menu="sort-menu" aria-haspopup="menu" aria-expanded="false"><svg class="icon"><use href="#sort"/></svg>Sort</button>
+              <div class="menu" id="sort-menu" role="menu" aria-label="Sort by" hidden>
+                <button class="menu-item" role="menuitemradio" aria-checked="true">Date added<svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+                <button class="menu-item" role="menuitemradio" aria-checked="false">Name<svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+                <button class="menu-item" role="menuitemradio" aria-checked="false">Due date<svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+              </div>
+            </div>
+            <div class="menu-anchor">
+              <button class="btn btn-secondary btn-icon tip" data-tip="More actions" aria-label="More actions" data-menu="more-menu" aria-haspopup="menu" aria-expanded="false"><svg class="icon"><use href="#more"/></svg></button>
+              <div class="menu" id="more-menu" role="menu" aria-label="Actions" hidden>
+                <button class="menu-item" role="menuitem"><svg class="icon"><use href="#pencil"/></svg>Rename…</button>
+                <button class="menu-item" role="menuitem"><svg class="icon"><use href="#copy"/></svg>Duplicate</button>
+                <button class="menu-item" role="menuitem"><svg class="icon"><use href="#share"/></svg>Share…</button>
+                <div class="menu-sep" role="separator"></div>
+                <button class="menu-item destructive" role="menuitem"><svg class="icon"><use href="#trash"/></svg>Delete list</button>
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-icon tip" data-tip="Share" aria-label="Share"><svg class="icon"><use href="#share"/></svg></button>
+            <span class="footnote">Hover or focus an icon button for its tooltip</span>
+          </div>
+          <div class="grid2">
+            <div class="islands">
+              <div class="island island-pad">
+                <div class="field">
+                  <label id="repeat-label">Repeat</label>
+                  <div class="menu-anchor" style="display:block">
+                    <button class="select" data-menu="repeat-menu" aria-haspopup="menu" aria-expanded="false" aria-labelledby="repeat-label repeat-value"><span id="repeat-value">Never</span><svg class="icon"><use href="#chev-down"/></svg></button>
+                    <div class="menu full" id="repeat-menu" role="menu" aria-label="Repeat" hidden data-select="repeat-value">
+                      <button class="menu-item" role="menuitemradio" aria-checked="true">Never<svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+                      <button class="menu-item" role="menuitemradio" aria-checked="false">Every day<svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+                      <button class="menu-item" role="menuitemradio" aria-checked="false">Every week<svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+                      <button class="menu-item" role="menuitemradio" aria-checked="false">Every month<svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="island island-list">
+                <div class="row" style="cursor:default"><span class="row-text"><span class="row-title">Volume</span></span><input class="slider" type="range" min="0" max="100" step="5" value="60" aria-label="Volume" id="vol"><span class="row-trail" style="min-width:36px;justify-content:flex-end" id="vol-out">60%</span></div>
+                <div class="row" style="cursor:default"><span class="row-text"><span class="row-title">Remind me</span><span class="row-sub">Days before it’s due</span></span>
+                  <span class="stepper"><button aria-label="Fewer days" data-step="-1"><svg class="icon"><use href="#minus"/></svg></button><output class="roll" id="step-out" aria-live="polite"><span>2</span></output><button aria-label="More days" data-step="1"><svg class="icon"><use href="#plus"/></svg></button></span></div>
+              </div>
+              <div class="island island-list" data-context>
+                <div class="row"><svg class="icon row-lead"><use href="#bell"/></svg><span class="row-text"><span class="row-title">Notifications</span></span><svg class="icon chev"><use href="#chev"/></svg></div>
+                <div class="row"><svg class="icon row-lead"><use href="#sun"/></svg><span class="row-text"><span class="row-title">Appearance</span></span><span class="row-trail">Automatic<svg class="icon chev"><use href="#chev"/></svg></span></div>
+                <div class="row"><svg class="icon row-lead"><use href="#lock"/></svg><span class="row-text"><span class="row-title">Privacy</span></span><svg class="icon chev"><use href="#chev"/></svg></div>
+              </div>
+              <p class="footnote" style="margin-left:var(--space-1)">Settings rows take a leading icon. Right-click or long-press them for the context menu.</p>
+            </div>
+            <div class="island island-pad">
+              <div class="cal-head">
+                <p class="headline" id="cal-title">October 2026</p>
+                <div class="cal-nav">
+                  <button class="btn btn-secondary btn-icon" aria-label="Previous month" data-cal="-1"><svg class="icon"><use href="#chev-left"/></svg></button>
+                  <button class="btn btn-secondary btn-icon" aria-label="Next month" data-cal="1"><svg class="icon"><use href="#chev"/></svg></button>
+                </div>
+              </div>
+              <div class="cal-grid" id="cal-grid"></div>
+            </div>
+          </div>
+        </div>
+        <div class="menu fixed" id="ctx-menu" role="menu" aria-label="Row actions" hidden>
+          <button class="menu-item" role="menuitem"><svg class="icon"><use href="#pencil"/></svg>Rename…</button>
+          <button class="menu-item" role="menuitem"><svg class="icon"><use href="#copy"/></svg>Duplicate</button>
+          <div class="menu-sep" role="separator"></div>
+          <button class="menu-item destructive" role="menuitem"><svg class="icon"><use href="#trash"/></svg>Remove</button>
+        </div>
+      </section>
+
+      <section>
+        <p class="caption group-label">Tags, counts, banners, links</p>
+        <div class="islands">
+          <div class="island island-pad islands" style="gap:var(--space-4)">
+            <div class="chips" role="group" aria-label="Filter">
+              <button class="chip" aria-pressed="true">All</button><button class="chip" aria-pressed="false">Open</button><button class="chip" aria-pressed="false">Done</button>
+            </div>
+            <div class="chips">
+              <span class="chip" style="background:var(--cat-slate-tint);--dot:var(--cat-slate)"><span class="dot"></span>Work</span>
+              <span class="chip" style="background:var(--cat-sage-tint);--dot:var(--cat-sage)"><span class="dot"></span>Home</span>
+              <span class="chip" style="background:var(--cat-sand-tint);--dot:var(--cat-sand)"><span class="dot"></span>Travel</span>
+              <span class="chip" style="background:var(--cat-rose-tint);--dot:var(--cat-rose)"><span class="dot"></span>Family</span>
+              <button class="chip" aria-label="Remove tag Design">Design<svg class="icon"><use href="#x"/></svg></button>
+            </div>
+            <div class="chips">
+              <span class="chip" style="background:var(--success-tint);--dot:var(--success)"><span class="dot"></span>Paid</span>
+              <span class="chip" style="background:var(--warning-tint);--dot:var(--warning)"><span class="dot"></span>Due soon</span>
+              <span class="chip" style="background:var(--danger-tint);--dot:var(--danger)"><span class="dot"></span>Overdue</span>
+              <span class="badge-wrap" style="margin-left:var(--space-3)"><button class="btn btn-secondary btn-icon" aria-label="Inbox, 3 new"><svg class="icon"><use href="#inbox"/></svg></button><span class="badge">3</span></span>
+              <span class="badge-wrap"><button class="btn btn-secondary btn-icon" aria-label="Notifications, new"><svg class="icon"><use href="#bell"/></svg></button><span class="badge dot"></span></span>
+            </div>
+            <p class="body">Shared lists follow your <a class="link" href="#">privacy settings</a>. People you invite can see every task in the list.</p>
+          </div>
+          <div class="banner info" role="status"><svg class="icon"><use href="#info"/></svg><span class="banner-text"><span class="banner-title">You’re offline</span>Changes will sync when you’re back online.</span></div>
+          <div class="banner warning"><svg class="icon"><use href="#warn"/></svg><span class="banner-text"><span class="banner-title">Your trial ends in 3 days</span>Pick a plan to keep your lists.</span><button class="btn btn-plain">Choose plan</button></div>
+          <div class="banner danger" role="alert"><svg class="icon"><use href="#err"/></svg><span class="banner-text"><span class="banner-title">Couldn’t sync 2 tasks</span></span><button class="btn btn-plain">Try again</button></div>
+          <div class="banner success"><svg class="icon"><use href="#ok"/></svg><span class="banner-text"><span class="banner-title">Backup is on</span>Your lists are saved every night.</span></div>
         </div>
       </section>
 
@@ -352,6 +579,65 @@
     return el => place(el, true);
   }
 
+  /* ---------- Drag to dismiss a bottom sheet ---------- */
+  function sheetDrag(panel, scrim, close) {
+    const mobile = matchMedia('(max-width: 639px)');
+    const interactive = 'input, textarea, select, button, label, a, [contenteditable]';
+    let startY = 0, lastY = 0, lastT = 0, velocity = 0, offset = 0, dragging = false;
+    const resist = dy => dy >= 0 ? dy : -Math.sqrt(-dy) * 4;
+    const paint = () => {
+      panel.style.transform = `translateY(${resist(offset)}px)`;
+      scrim.style.opacity = String(Math.max(0, 1 - offset / panel.offsetHeight));
+    };
+    const release = () => {
+      panel.classList.remove('dragging'); scrim.classList.remove('dragging');
+      panel.style.transform = ''; scrim.style.opacity = '';
+    };
+    panel.addEventListener('pointerdown', e => {
+      if (!mobile.matches || e.button !== 0 || e.target.closest(interactive)) return;
+      const scroller = e.target.closest('.scroll');
+      if (scroller && scroller.scrollTop > 0) return;
+      dragging = true; startY = lastY = e.clientY; lastT = e.timeStamp; velocity = 0; offset = 0;
+      panel.setPointerCapture(e.pointerId);
+      panel.classList.add('dragging'); scrim.classList.add('dragging');
+    });
+    panel.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const dt = Math.max(1, e.timeStamp - lastT);
+      velocity = 0.8 * ((e.clientY - lastY) / dt) + 0.2 * velocity;
+      lastY = e.clientY; lastT = e.timeStamp;
+      offset = e.clientY - startY;
+      paint();
+    });
+    const end = () => {
+      if (!dragging) return;
+      dragging = false;
+      const dismiss = offset > panel.offsetHeight / 3 || (velocity > 0.5 && offset > 0);
+      panel.getBoundingClientRect();
+      release();
+      if (dismiss) close();
+    };
+    panel.addEventListener('pointerup', end);
+    panel.addEventListener('pointercancel', end);
+  }
+
+  function rollNumber(el, value) {
+    if (!el.classList.contains('roll')) { el.classList.add('roll'); el.innerHTML = `<span>${el.textContent}</span>`; }
+    const current = [...el.children].filter(c => !c.dataset.leaving).pop();
+    if (current.textContent === String(value)) return;
+    if (reduce || current.textContent === '' || !el.offsetHeight) { el.innerHTML = `<span>${value}</span>`; return; }
+    const up = +value > +current.textContent;
+    const next = document.createElement('span'); next.textContent = value;
+    el.appendChild(next);
+    current.dataset.leaving = 'true';
+    current.getAnimations().forEach(a => a.pause());
+    const from = getComputedStyle(current);
+    current.animate([{ transform: from.transform === 'none' ? 'none' : from.transform, opacity: from.opacity, filter: from.filter === 'none' ? 'blur(0)' : from.filter },
+      { transform: `translateY(${up ? -70 : 70}%)`, opacity: 0, filter: 'blur(3px)' }],
+      { duration: SPRING.duration * 0.55, easing: css.getPropertyValue('--ease-out').trim(), fill: 'forwards' }).onfinish = () => current.remove();
+    next.animate([{ transform: `translateY(${up ? 70 : -70}%)`, opacity: 0, filter: 'blur(3px)' }, { transform: 'none', opacity: 1, filter: 'blur(0)' }], SPRING);
+  }
+
   /* ---------- Blur swap for content changes ---------- */
   function blurSwap(el, change) {
     if (reduce) { change(); return; }
@@ -383,7 +669,7 @@
     inbox: { kicker: 'Nothing waiting', html: () => `
       <h2 class="title1">Inbox</h2>
       <div class="island empty">${svg('inbox')}<p class="headline">Inbox zero</p><p class="footnote">New tasks you capture land here.</p></div>` },
-    you: { kicker: 'olgerdev', html: () => `
+    you: { kicker: 'ochotzas', html: () => `
       <h2 class="title1">You</h2>
       <div class="islands">
         <div class="island island-list">
@@ -401,7 +687,7 @@
   const syncToday = () => {
     const count = document.getElementById('count'); if (!count) return;
     const done = tasks.filter(t => t[2]).length, bar = document.getElementById('bar');
-    count.textContent = done; document.getElementById('of').textContent = `of ${tasks.length} done`;
+    rollNumber(count, done); document.getElementById('of').textContent = `of ${tasks.length} done`;
     if (bar.children.length !== tasks.length) bar.innerHTML = tasks.map(() => '<i></i>').join('');
     requestAnimationFrame(() => [...bar.children].forEach((s, j) => s.classList.toggle('on', j < done)));
   };
@@ -435,6 +721,111 @@
   document.getElementById('longlist').addEventListener('click', e => { const r = e.target.closest('.row'); if (r) r.classList.toggle('done'); });
   refreshFades();
 
+  const menuTriggers = new Map();
+  let openMenuEl = null;
+  function closeMenu(returnFocus = true) {
+    if (!openMenuEl) return;
+    const m = openMenuEl, trigger = menuTriggers.get(m);
+    openMenuEl = null;
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    const done = () => { m.hidden = true; m.classList.remove('up'); };
+    if (reduce) done(); else m.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: css.getPropertyValue('--ease-in').trim() }).onfinish = done;
+    if (returnFocus && trigger) trigger.focus();
+  }
+  function openMenu(m, trigger, point) {
+    closeMenu(false);
+    m.hidden = false; openMenuEl = m; menuTriggers.set(m, trigger);
+    if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    if (point) {
+      const w = m.offsetWidth, h = m.offsetHeight;
+      m.style.left = Math.min(point.x, innerWidth - w - 8) + 'px';
+      m.style.top = Math.min(point.y, innerHeight - h - 8) + 'px';
+    } else if (m.getBoundingClientRect().bottom > innerHeight - 8) m.classList.add('up');
+    if (!reduce) m.animate([{ opacity: 0, transform: 'scale(0.96)' }, { opacity: 1, transform: 'none' }], SPRING);
+    const first = m.querySelector('[aria-checked="true"]') || m.querySelector('.menu-item');
+    first.focus();
+  }
+  document.querySelectorAll('[data-menu]').forEach(trigger => {
+    const m = document.getElementById(trigger.dataset.menu);
+    trigger.addEventListener('click', e => { e.stopPropagation(); openMenuEl === m ? closeMenu() : openMenu(m, trigger); });
+  });
+  document.querySelectorAll('.menu').forEach(m => {
+    const items = () => [...m.querySelectorAll('.menu-item')];
+    m.addEventListener('click', e => {
+      const item = e.target.closest('.menu-item'); if (!item) return;
+      if (item.getAttribute('role') === 'menuitemradio') {
+        items().forEach(i => i.setAttribute('aria-checked', String(i === item)));
+        if (m.dataset.select) document.getElementById(m.dataset.select).textContent = item.textContent.trim();
+      }
+      closeMenu();
+    });
+    m.addEventListener('keydown', e => {
+      const list = items(), i = list.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); list[(i + 1) % list.length].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); list[(i - 1 + list.length) % list.length].focus(); }
+      else if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); list[e.key === 'Home' ? 0 : list.length - 1].focus(); }
+      else if (e.key === 'Tab') closeMenu(false);
+      else if (e.key.length === 1) {
+        const hit = list.find((it, j) => j > i && it.textContent.trim().toLowerCase().startsWith(e.key.toLowerCase())) || list.find(it => it.textContent.trim().toLowerCase().startsWith(e.key.toLowerCase()));
+        if (hit) hit.focus();
+      }
+    });
+  });
+  document.addEventListener('click', e => { if (openMenuEl && !openMenuEl.contains(e.target)) closeMenu(false); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && openMenuEl) { e.stopPropagation(); closeMenu(); } }, true);
+
+  const ctx = document.getElementById('ctx-menu');
+  document.querySelectorAll('[data-context] .row').forEach(row => {
+    row.addEventListener('contextmenu', e => { e.preventDefault(); openMenu(ctx, row, { x: e.clientX, y: e.clientY }); });
+    let timer;
+    row.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'touch') return;
+      timer = setTimeout(() => { navigator.vibrate?.(10); openMenu(ctx, row, { x: e.clientX, y: e.clientY }); }, 500);
+    });
+    ['pointerup', 'pointercancel', 'pointermove'].forEach(t => row.addEventListener(t, () => clearTimeout(timer)));
+  });
+
+  const vol = document.getElementById('vol'), volOut = document.getElementById('vol-out');
+  const syncVol = () => { vol.style.setProperty('--p', vol.value + '%'); volOut.textContent = vol.value + '%'; };
+  vol.addEventListener('input', syncVol); syncVol();
+
+  const stepOut = document.getElementById('step-out'), stepBtns = [...document.querySelectorAll('[data-step]')];
+  let stepValue = 2;
+  const syncStep = () => { rollNumber(stepOut, stepValue); stepBtns.forEach(b => b.disabled = (b.dataset.step < 0 && stepValue <= 0) || (b.dataset.step > 0 && stepValue >= 7)); };
+  stepBtns.forEach(b => b.onclick = () => { stepValue += +b.dataset.step; syncStep(); });
+  syncStep();
+
+  const today = new Date(2026, 9, 12);
+  let calMonth = new Date(2026, 9, 1), calSelected = new Date(2026, 9, 16);
+  const calGrid = document.getElementById('cal-grid'), calTitle = document.getElementById('cal-title');
+  const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  function renderCal() {
+    const y = calMonth.getFullYear(), mo = calMonth.getMonth();
+    const lead = (new Date(y, mo, 1).getDay() + 6) % 7, days = new Date(y, mo + 1, 0).getDate();
+    calTitle.textContent = calMonth.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    calGrid.innerHTML = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => `<span class="wd">${d}</span>`).join('')
+      + '<span></span>'.repeat(lead)
+      + Array.from({ length: days }, (_, i) => {
+        const d = new Date(y, mo, i + 1);
+        return `<button class="cal-day${sameDay(d, today) ? ' today' : ''}" aria-pressed="${sameDay(d, calSelected)}" data-day="${i + 1}"${sameDay(d, today) ? ' aria-current="date"' : ''}>${i + 1}</button>`;
+      }).join('');
+  }
+  calGrid.addEventListener('click', e => {
+    const b = e.target.closest('.cal-day'); if (!b) return;
+    calSelected = new Date(calMonth.getFullYear(), calMonth.getMonth(), +b.dataset.day);
+    calGrid.querySelectorAll('.cal-day').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  });
+  document.querySelectorAll('[data-cal]').forEach(b => b.onclick = () => {
+    calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + +b.dataset.cal, 1);
+    blurSwap(calTitle, renderCal);
+  });
+  renderCal();
+
+  document.querySelectorAll('.chips[role="group"]').forEach(group => {
+    const chips = [...group.querySelectorAll('.chip')];
+    chips.forEach(c => c.onclick = () => chips.forEach(x => x.setAttribute('aria-pressed', String(x === c))));
+  });
+
   /* ---------- Theme ---------- */
   const root = document.documentElement;
   try { const s = localStorage.getItem('graphite-theme'); if (s) root.dataset.theme = s; } catch {}
@@ -446,8 +837,33 @@
 
   /* ---------- Sheet / dialog ---------- */
   const sheet = document.getElementById('sheet-root'), input = document.getElementById('tn');
-  const close = () => sheet.classList.remove('open');
-  document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => { sheet.classList.add('open'); setTimeout(() => input.focus(), 300); });
+  const sheetPanel = sheet.querySelector('.sheet'), scrim = sheet.querySelector('.scrim');
+  const behind = [document.querySelector('main.page'), document.getElementById('theme')];
+  let opener = null;
+  sheet.inert = true;
+  const open = from => {
+    opener = from;
+    sheet.inert = false; sheet.classList.add('open');
+    behind.forEach(el => el.inert = true);
+    document.documentElement.style.overflow = 'hidden';
+    setTimeout(() => input.focus(), reduce ? 0 : 300);
+  };
+  const close = () => {
+    if (!sheet.classList.contains('open')) return;
+    sheet.classList.remove('open'); sheet.inert = true;
+    behind.forEach(el => el.inert = false);
+    document.documentElement.style.overflow = '';
+    if (opener) opener.focus();
+  };
+  sheetDrag(sheetPanel, scrim, close);
+  sheetPanel.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const focusable = [...sheetPanel.querySelectorAll('button, input, select, textarea, [href], [tabindex]:not([tabindex="-1"])')].filter(el => !el.disabled);
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => open(b));
   document.querySelectorAll('[data-close]').forEach(b => b.onclick = close);
   document.querySelector('[data-add]').onclick = () => {
     if (input.value.trim()) { tasks.push([input.value.trim(), '', false]); input.value = ''; if (document.getElementById('tasks')) show('today'); }

@@ -1,8 +1,8 @@
 {
   "name": "graphite",
   "displayName": "Graphite",
-  "version": "1.0.0",
-  "description": "A monotone, calm, Apple-simple design system for any UI work: web, Tailwind, React, React Native/Expo, SwiftUI, emails and slides.",
+  "version": "2.0.0",
+  "description": "A graphite-toned, calm, Apple-simple design system for any UI work: web, Tailwind, React, React Native/Expo, SwiftUI, emails and slides.",
   "author": {
     "name": "Olger Chotza",
     "url": "https://ochotzas.com"

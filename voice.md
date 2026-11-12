@@ -11,6 +11,12 @@ Write like Apple: short, plain, human, calm. The UI is quiet, so the words are q
 - **No filler**: "Simply", "Just", "Easily", "Seamlessly", "Unlock", "Supercharge", "Elevate", "Leverage", "Effortless", "Next-level", "Revolutionary", "Powered by AI".
 - Numbers as digits ("3 items"). Use the real ellipsis "…" for actions that open more input ("Rename…").
 - Use curly quotes and apostrophes in display text: ’ “ ”.
+- **No trailing periods** on titles, labels, buttons and captions. Only multi-sentence text keeps them.
+- **Titles name the context**, never greet: "October 2026", not "Welcome back, Sam! 👋".
+- **Changes say what they compare to**: "+12% vs last month", not "+12%!!".
+- **Short placeholders**: "Search", not "Search anything...".
+- **No unverifiable claims** ("10x faster", "Loved by 10,000+ teams"). Ask if they're real; keep them quiet and specific, or remove them.
+- **Mock data looks real**: plausible numbers and names, never `$123,456` or `[X]`.
 
 ## Patterns
 

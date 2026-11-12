@@ -28,6 +28,19 @@ Copy `tokens.css`, use `var(--token)`, copy component CSS from `examples/showcas
   --color-ink-3: var(--ink-3);
   --color-on-ink: var(--on-ink);
   --color-danger: var(--danger);
+  --color-danger-tint: var(--danger-tint);
+  --color-accent: var(--accent);
+  --color-accent-tint: var(--accent-tint);
+  --color-success: var(--success);
+  --color-success-tint: var(--success-tint);
+  --color-warning: var(--warning);
+  --color-warning-tint: var(--warning-tint);
+  --color-cat-slate: var(--cat-slate);
+  --color-cat-sage: var(--cat-sage);
+  --color-cat-sand: var(--cat-sand);
+  --color-cat-clay: var(--cat-clay);
+  --color-cat-rose: var(--cat-rose);
+  --color-cat-lilac: var(--cat-lilac);
   --color-transparent: transparent;
   --radius-sm: 8px; --radius-md: 14px; --radius-lg: 22px; --radius-xl: 34px;
   --font-sans: var(--font);
@@ -60,7 +73,7 @@ export const useTheme = () => theme(useColorScheme() === 'dark' ? 'dark' : 'ligh
 - Never present a sheet from a sheet. Push inside it with a `NavigationStack` instead.
 - Screen title = navigation large title (it already collapses on scroll, which is the "collapsing title" effect).
 
-**Colors.** Asset catalog color sets named after the tokens (`bg`, `surface`, `press`, `track`, `line`, `ring`, `ink`, `ink2`, `ink3`, `onInk`, `danger`) with light/dark values from `tokens.ts`. `.tint(Color("ink"))` at the root.
+**Colors.** Asset catalog color sets named after the tokens (`bg`, `surface`, `press`, `track`, `line`, `ring`, `ink`, `ink2`, `ink3`, `onInk`, `danger`, plus `accent`, `success`, `warning`, their `…Tint`s and `catSlate` … `catLilac`) with light/dark values from `tokens.ts`. `.tint(Color("ink"))` at the root.
 
 **Font.** Ready-made files in `fonts/` (Figtree 400/500/600/700, OFL license — ship `OFL.txt` along).
 1. Drag the four `.ttf` files into the app target (check "Copy items if needed" and the target).

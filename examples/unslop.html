@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graphite Unslop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<style>
+  .title1 { font-size: var(--text-title1); line-height: var(--lh-title1); letter-spacing: var(--track-title1); font-weight: 700; margin: 0; }
+  .headline { font-size: var(--text-headline); line-height: var(--lh-headline); font-weight: 600; margin: 0; }
+  .body { font-size: var(--text-body); line-height: var(--lh-body); margin: 0; }
+  .footnote { font-size: var(--text-footnote); line-height: var(--lh-footnote); font-weight: 500; color: var(--ink-2); margin: 0; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  .island { background: var(--surface); border-radius: var(--radius-lg); }
+  .island-list { overflow: hidden; }
+  .island-pad { padding: var(--space-5); }
+  .group-label { margin: 0 0 var(--space-2) var(--space-1); }
+
+  .row { position: relative; display: flex; align-items: center; gap: var(--space-3); min-height: 52px; padding: var(--space-3) var(--space-4);
+    cursor: pointer; transition: background var(--dur-fast) var(--ease-out); }
+  .row:hover { background: var(--press); }
+  .row:active { background: var(--line); }
+  .row + .row::before { content: ""; position: absolute; top: 0; left: var(--space-4); right: 0; height: 1px; background: var(--line); transition: opacity var(--dur-fast); }
+  .row:hover::before, .row:hover + .row::before { opacity: 0; }
+  .row-static { cursor: default; }
+  .row-static:hover, .row-static:active { background: none; }
+  .row-static:hover::before, .row-static:hover + .row::before { opacity: 1; }
+  .row-text { flex: 1; min-width: 0; }
+  .row-title { display: block; font-weight: 500; line-height: 22px; }
+  .row-sub { display: block; font-size: var(--text-footnote); line-height: var(--lh-footnote); font-weight: 500; color: var(--ink-2); }
+  .row-value { font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  .btn { height: 44px; padding: 0 var(--space-5); border: 0; border-radius: var(--radius-full); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    font: 600 15px/1 var(--font); white-space: nowrap; transition: transform var(--dur-spring) var(--spring), background var(--dur-fast); -webkit-tap-highlight-color: transparent; }
+  .btn:active { transform: scale(var(--press-scale)); transition-duration: 90ms; }
+  .btn-primary { background: var(--ink); color: var(--on-ink); }
+  .btn-secondary { background: var(--surface); color: var(--ink); }
+  .btn-icon { width: 44px; padding: 0; }
+  .icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+  .search { position: relative; flex: 1; min-width: 0; max-width: 280px; }
+  .search .icon { position: absolute; left: var(--space-3); top: 12px; color: var(--ink-3); }
+  .search input { width: 100%; height: 44px; padding: 0 var(--space-4) 0 44px; border: 0; border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: inherit; outline: none; transition: box-shadow var(--dur-fast); }
+  .search input::placeholder { color: var(--ink-3); }
+  .search input:focus { box-shadow: 0 0 0 2px var(--accent); }
+
+  .liquid { position: relative; isolation: isolate; }
+  .liquid-ind { position: absolute; z-index: -1; border-radius: var(--radius-full); pointer-events: none; }
+  .segmented { display: flex; padding: 3px; border-radius: var(--radius-full); background: var(--track); width: 100%; max-width: 280px; }
+  .segmented .liquid-ind { top: 3px; bottom: 3px; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .segmented button { flex: 1; height: 36px; border: 0; background: none; font: 500 15px var(--font); color: var(--ink-2); cursor: pointer; transition: color var(--dur-base); }
+  .segmented button[aria-pressed="true"] { color: var(--ink); font-weight: 600; }
+
+  .page { max-width: var(--width-app); margin: 0 auto; padding: var(--space-8) var(--gutter) var(--space-9); }
+  .intro { display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-6); }
+  .intro .body { color: var(--ink-2); max-width: var(--width-read); }
+  .stage { display: flex; flex-direction: column; gap: var(--space-6); }
+  .notes .row-title { font-weight: 500; }
+  .theme-btn { position: fixed; right: var(--gutter); bottom: var(--gutter); z-index: 10; box-shadow: var(--shadow-float); }
+  [hidden] { display: none !important; }
+
+  .dash { display: flex; flex-direction: column; gap: var(--space-5); }
+  .dash-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
+  .dash-actions { display: flex; gap: var(--space-3); align-items: center; flex: 1; justify-content: flex-end; min-width: 260px; }
+  .dash-grid { display: grid; gap: var(--island-gap); grid-template-columns: 1fr; align-items: start; }
+  @media (min-width: 900px) { .dash-grid { grid-template-columns: 2fr 1fr; } }
+  .paid-head { display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-5); }
+  .chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-3); align-items: end; height: 176px; }
+  .bar-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: var(--space-2); height: 100%; }
+  .bar { width: 100%; max-width: 44px; border-radius: var(--radius-sm); background: var(--track); }
+  .bar-col.now .bar { background: var(--ink); }
+  .bar-col.now .footnote { color: var(--ink); }
+
+  .slop { --s-bg: #0d0a1f; border-radius: 20px; padding: 28px 22px 31px; color: #e9d5ff;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    background: radial-gradient(60% 50% at 85% 0%, rgba(168,85,247,0.35), transparent 70%), radial-gradient(50% 40% at 0% 100%, rgba(59,130,246,0.25), transparent 70%), var(--s-bg); }
+  .slop-top { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+  .slop h2 { margin: 0; font-size: 34px; font-weight: 900; letter-spacing: -0.02em; background: linear-gradient(90deg, #c084fc, #60a5fa, #f472b6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .slop-sub { margin: 6px 0 0; color: #a78bfa; font-size: 14px; letter-spacing: -0.03em; font-style: italic; }
+  .slop-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .slop-search { height: 38px; width: 200px; max-width: 100%; padding: 0 14px; border-radius: 999px; border: 1px solid #a855f7; background: rgba(168,85,247,0.08); color: #ddd6fe; font: inherit; font-size: 13px; box-shadow: 0 0 18px rgba(168,85,247,0.45); }
+  .slop-search::placeholder { color: #a78bfa; }
+  .slop-btn { height: 38px; padding: 0 17px; border: 0; border-radius: 999px; color: #fff; font: 700 13px Inter, system-ui, sans-serif; cursor: pointer; background: linear-gradient(90deg, #8b5cf6, #3b82f6); box-shadow: 0 0 24px rgba(139,92,246,0.6); transition: all 0.3s; }
+  .slop-btn:hover { transform: scale(1.06); }
+  .slop-btn.alt { background: linear-gradient(90deg, #ec4899, #f97316); box-shadow: 0 0 24px rgba(236,72,153,0.55); }
+  .slop-badge { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 9px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.12em; color: #fff; background: linear-gradient(90deg, #f59e0b, #ec4899); box-shadow: 0 0 14px rgba(245,158,11,0.6); vertical-align: middle; margin-left: 8px; }
+  .slop-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 15px; margin-bottom: 15px; }
+  .slop-card { padding: 18px 19px 22px; border-radius: 18px; border: 1px solid rgba(168,85,247,0.5); background: rgba(255,255,255,0.05); box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 8px 30px rgba(139,92,246,0.35); transition: all 0.3s; }
+  .slop-card:hover { transform: translateY(-6px) scale(1.03); }
+  .slop-label { font-size: 11px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: #a78bfa; }
+  .slop-val { margin: 9px 0 3px; font-size: 30px; font-weight: 900; color: #fff; }
+  .slop-up { color: #4ade80; font-weight: 800; font-size: 13px; }
+  .slop-warn { color: #fbbf24; font-weight: 800; font-size: 13px; }
+  .slop-spark { display: flex; gap: 3px; align-items: end; height: 26px; margin-top: 13px; }
+  .slop-spark i { flex: 1; border-radius: 999px; background: linear-gradient(#c084fc, #60a5fa); }
+  .slop-wide { display: grid; gap: 15px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .slop-wide { grid-template-columns: 1fr 1fr; } }
+  .slop-chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; align-items: end; height: 150px; margin-top: 17px; }
+  .slop-chart div { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 7px; height: 100%; }
+  .slop-chart i { width: 100%; border-radius: 999px; }
+  .slop-chart span { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; color: #a78bfa; }
+  .slop-live { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 10px #4ade80; animation: slop-ping 1.2s infinite; }
+  @keyframes slop-ping { 50% { transform: scale(1.8); opacity: 0.4; } }
+  .slop-ai p { margin: 11px 0 0; font-size: 14px; line-height: 1.55; color: #ddd6fe; }
+  .slop-ai b { background: linear-gradient(90deg, #f0abfc, #93c5fd); -webkit-background-clip: text; background-clip: text; color: transparent; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></symbol>
+  <symbol id="moon" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 019.5 4.5a8 8 0 1010 10z"/></symbol>
+</svg>
+
+<main class="page">
+  <div class="intro">
+    <p class="footnote">Graphite example</p>
+    <h1 class="title1">Unslop</h1>
+    <p class="body">The same invoicing dashboard before and after the passes in unslop.md. Features, data and order stay; every color, size and word becomes deliberate.</p>
+    <div class="segmented liquid" role="group" aria-label="Version">
+      <span class="liquid-ind"></span>
+      <button aria-pressed="true" data-view="before">Before</button>
+      <button aria-pressed="false" data-view="after">After</button>
+    </div>
+  </div>
+
+  <div class="stage" id="stage">
+    <section data-panel="before">
+      <div class="slop">
+        <div class="slop-top">
+          <div>
+            <h2>Welcome back, Sam! 👋</h2>
+            <p class="slop-sub">Here’s what’s happening with your money today!!</p>
+          </div>
+          <div class="slop-actions">
+            <input class="slop-search" placeholder="🔍 Search anything...">
+            <button class="slop-btn">🚀 Create Invoice</button>
+            <button class="slop-btn alt">📊 Export Report</button>
+          </div>
+        </div>
+        <div class="slop-cards">
+          <div class="slop-card">
+            <div class="slop-label">💰 Total revenue</div>
+            <div class="slop-val">$48,210</div>
+            <div class="slop-up">▲ +12%!!</div>
+            <div class="slop-spark"><i style="height:40%"></i><i style="height:55%"></i><i style="height:35%"></i><i style="height:70%"></i><i style="height:85%"></i><i style="height:100%"></i></div>
+          </div>
+          <div class="slop-card">
+            <div class="slop-label">⏳ Outstanding</div>
+            <div class="slop-val">$12,640.00</div>
+            <div class="slop-up">11 invoices 🔥</div>
+            <div class="slop-spark"><i style="height:80%"></i><i style="height:60%"></i><i style="height:75%"></i><i style="height:50%"></i><i style="height:65%"></i><i style="height:45%"></i></div>
+          </div>
+          <div class="slop-card">
+            <div class="slop-label">⚠️ Overdue</div>
+            <div class="slop-val">03</div>
+            <div class="slop-warn">3 overdue 😬</div>
+            <div class="slop-spark"><i style="height:30%"></i><i style="height:50%"></i><i style="height:90%"></i><i style="height:40%"></i><i style="height:60%"></i><i style="height:70%"></i></div>
+          </div>
+        </div>
+        <div class="slop-wide">
+          <div class="slop-card">
+            <div class="slop-label"><span class="slop-live"></span>Revenue trends</div>
+            <div class="slop-chart">
+              <div><i style="height:65%;background:linear-gradient(#f472b6,#ec4899);box-shadow:0 0 14px #ec4899"></i><span>MAY</span></div>
+              <div><i style="height:72%;background:linear-gradient(#fb923c,#f97316);box-shadow:0 0 14px #f97316"></i><span>JUN</span></div>
+              <div><i style="height:62%;background:linear-gradient(#facc15,#eab308);box-shadow:0 0 14px #eab308"></i><span>JUL</span></div>
+              <div><i style="height:80%;background:linear-gradient(#4ade80,#22c55e);box-shadow:0 0 14px #22c55e"></i><span>AUG</span></div>
+              <div><i style="height:89%;background:linear-gradient(#60a5fa,#3b82f6);box-shadow:0 0 14px #3b82f6"></i><span>SEP</span></div>
+              <div><i style="height:100%;background:linear-gradient(#c084fc,#8b5cf6);box-shadow:0 0 14px #8b5cf6"></i><span>OCT</span></div>
+            </div>
+          </div>
+          <div class="slop-card slop-ai">
+            <div class="slop-label">✨ AI insights <span class="slop-badge">PRO</span></div>
+            <p><b>Supercharge your cash flow</b> with AI-powered insights! Unlock seamless payments and get paid 10x faster. Loved by 10,000+ freelancers. 🚀</p>
+            <p>3 clients are late. Send a magic reminder ✨</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section data-panel="after" hidden>
+      <div class="dash">
+        <div class="dash-top">
+          <div>
+            <p class="footnote">Invoices</p>
+            <h2 class="title1">October 2026</h2>
+          </div>
+          <div class="dash-actions">
+            <label class="search"><svg class="icon"><use href="#search"/></svg><input placeholder="Search" aria-label="Search invoices"></label>
+            <button class="btn btn-primary"><svg class="icon"><use href="#plus"/></svg>New invoice</button>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="island island-pad">
+            <div class="paid-head">
+              <p class="footnote">Paid</p>
+              <p class="title1 num">$48,210</p>
+              <p class="footnote num">+12% vs September</p>
+            </div>
+            <div class="chart" role="img" aria-label="Paid per month, May to October: 31,480; 34,920; 29,750; 38,610; 42,980; 48,210 dollars">
+              <div class="bar-col"><div class="bar" style="height:65%"></div><span class="footnote">May</span></div>
+              <div class="bar-col"><div class="bar" style="height:72%"></div><span class="footnote">Jun</span></div>
+              <div class="bar-col"><div class="bar" style="height:62%"></div><span class="footnote">Jul</span></div>
+              <div class="bar-col"><div class="bar" style="height:80%"></div><span class="footnote">Aug</span></div>
+              <div class="bar-col"><div class="bar" style="height:89%"></div><span class="footnote">Sep</span></div>
+              <div class="bar-col now"><div class="bar" style="height:100%"></div><span class="footnote">Oct</span></div>
+            </div>
+          </div>
+
+          <div class="island island-list">
+            <div class="row row-static"><span class="row-text"><span class="row-title">Outstanding</span><span class="row-sub">11 invoices</span></span><span class="row-value">$12,640</span></div>
+            <div class="row row-static"><span class="row-text"><span class="row-title">Overdue</span><span class="row-sub">3 invoices</span></span><span class="row-value">$3,180</span></div>
+            <div class="row row-static"><span class="row-text"><span class="row-title">Time to get paid</span><span class="row-sub">2 days faster vs September</span></span><span class="row-value">9 days</span></div>
+          </div>
+        </div>
+
+        <div>
+          <p class="footnote group-label">Overdue</p>
+          <div class="island island-list">
+            <div class="row"><span class="row-text"><span class="row-title">Harbor &amp; Pine</span><span class="row-sub num">#1038 · 21 days late</span></span><span class="row-value">$1,180</span></div>
+            <div class="row"><span class="row-text"><span class="row-title">Northwind Studio</span><span class="row-sub num">#1042 · 14 days late</span></span><span class="row-value">$1,240</span></div>
+            <div class="row"><span class="row-text"><span class="row-title">Kesta Bakery</span><span class="row-sub num">#1047 · 6 days late</span></span><span class="row-value">$760</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <p class="footnote group-label" id="notes-label">Signs found</p>
+      <div class="island island-list notes" id="notes"></div>
+    </section>
+  </div>
+</main>
+
+<button class="btn btn-secondary btn-icon theme-btn" id="theme" aria-label="Toggle dark mode"><svg class="icon"><use href="#moon"/></svg></button>
+
+<script>
+  const root = document.documentElement;
+  const css = getComputedStyle(root);
+  const tok = (e, d) => ({ easing: css.getPropertyValue(e).trim(), duration: parseFloat(css.getPropertyValue(d)) });
+  const SPRING = tok('--spring', '--dur-spring'), FAST = tok('--spring-fast', '--dur-spring-fast'), SLOW = tok('--spring-slow', '--dur-spring-slow');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const notes = {
+    before: {
+      label: 'Signs found',
+      rows: [
+        ['Greeting title with emoji and gradient text', 'Header'],
+        ['Exclamation marks, “!!”, a change with no reference', 'Subtitle, revenue card'],
+        ['Purple and blue gradients, glows, color washes', 'Background, buttons, cards, badge'],
+        ['Emoji as icons and in labels', 'Every card, buttons, search'],
+        ['Uppercase tracked labels, weight 900, italic', 'Card labels, chart, title'],
+        ['Mixed number formats: $48,210, $12,640.00, 03', 'Stat cards'],
+        ['Sparklines stuffed into every stat card', 'Stat cards'],
+        ['Rainbow, glowing, pill-shaped bars', 'Revenue chart'],
+        ['Pulsing “live” dot on data that isn’t live', 'Revenue chart'],
+        ['Hype copy, “PRO” badge, unsourced claims', 'AI insights card'],
+        ['Two loud buttons, hover scale, transition: all', 'Header, cards'],
+        ['Off-grid values: 31, 19, 17, 15', 'Padding and gaps'],
+      ],
+    },
+    after: {
+      label: 'What changed',
+      rows: [
+        ['Spacing', '4pt tokens; 12 between islands, 24 inside'],
+        ['Color', 'Graphite only; ink marks the current month and the one primary'],
+        ['Icons', 'Emoji removed; Lucide-style search and plus only'],
+        ['Copy', 'The period as the title; “+12% vs September”; “Search”; claims removed'],
+        ['Type', 'Figtree; big tight title; sentence case; tabular numbers in one format'],
+        ['Layout', 'One main chart with the paid figure; summary list beside it'],
+        ['Details', 'Stat cards merged into rows; sparklines and badge gone'],
+        ['Visuals', 'No decoration; the real overdue invoices instead of an AI card'],
+        ['Motion', 'No pulsing or hover lift; row fill on hover, push back on press'],
+      ],
+    },
+  };
+
+  const notesEl = document.getElementById('notes');
+  const notesLabel = document.getElementById('notes-label');
+  const escape = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  function renderNotes(view) {
+    notesLabel.textContent = notes[view].label;
+    notesEl.innerHTML = notes[view].rows
+      .map(([title, sub]) => `<div class="row row-static"><span class="row-text"><span class="row-title">${escape(title)}</span><span class="row-sub">${escape(sub)}</span></span></div>`)
+      .join('');
+  }
+
+  function liquid(group, items, isActive) {
+    const ind = group.querySelector('.liquid-ind');
+    const edges = el => ({ l: el.offsetLeft, r: group.clientWidth - el.offsetLeft - el.offsetWidth });
+    let cur;
+    const place = (el, animate) => {
+      const to = edges(el);
+      ind.getAnimations().forEach(a => a.cancel());
+      ind.style.left = to.l + 'px'; ind.style.right = to.r + 'px';
+      if (animate && cur && !reduce) {
+        const right = to.l > cur.l;
+        ind.animate({ left: [cur.l + 'px', to.l + 'px'] }, right ? SLOW : FAST);
+        ind.animate({ right: [cur.r + 'px', to.r + 'px'] }, right ? FAST : SLOW);
+      }
+      cur = to;
+    };
+    place(items.find(isActive), false);
+    addEventListener('resize', () => place(items.find(isActive), false));
+    return el => place(el, true);
+  }
+
+  function blurSwap(el, change) {
+    if (reduce) { change(); return; }
+    const out = el.animate([{ opacity: 1, filter: 'blur(0)', transform: 'none' }, { opacity: 0, filter: 'blur(8px)', transform: 'translateY(-4px) scale(0.98)' }],
+      { duration: 160, easing: css.getPropertyValue('--ease-in').trim(), fill: 'forwards' });
+    out.onfinish = () => {
+      change(); out.cancel();
+      el.animate([{ opacity: 0, filter: 'blur(8px)', transform: 'translateY(8px) scale(0.98)' }, { opacity: 1, filter: 'blur(0)', transform: 'none' }], SPRING);
+    };
+  }
+
+  const stage = document.getElementById('stage');
+  const seg = document.querySelector('.segmented');
+  const btns = [...seg.querySelectorAll('button')];
+  const move = liquid(seg, btns, b => b.getAttribute('aria-pressed') === 'true');
+  const show = view => {
+    stage.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== view);
+    renderNotes(view);
+  };
+  btns.forEach(b => b.onclick = () => {
+    if (b.getAttribute('aria-pressed') === 'true') return;
+    btns.forEach(x => x.setAttribute('aria-pressed', x === b));
+    move(b);
+    blurSwap(stage, () => show(b.dataset.view));
+  });
+  show('before');
+
+  try { const saved = localStorage.getItem('graphite-theme'); if (saved) root.dataset.theme = saved; } catch {}
+  document.getElementById('theme').onclick = () => {
+    const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('graphite-theme', root.dataset.theme); } catch {}
+  };
+</script>
+</body>
+</html>

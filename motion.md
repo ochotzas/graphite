@@ -18,13 +18,27 @@ Working reference for every effect below: **`examples/motion.html`** — copy fr
 | **Press** | `scale(var(--press-scale))` 0.96 in 90ms; release springs back. Buttons, rows, cards. |
 | **Check** | Circle fills (`--dur-base`); check mark pops `scale(0.6) → 1` with spring; row text → `ink-3`. Light haptic on native. |
 | **Progress** | Segment fills `scaleX(0 → 1)`, origin left, spring. |
-| **Count change** | New number slides in from below (up) / above (down), 60% of its height, spring. Or use Rolling numbers for big stats. |
+| **Count change** | Old and new number share one clipped slot and move together: going up, the old one rises out (`translateY(-70%)`, fade, `blur(3px)`, 55% of the spring time, `--ease-out`) while the new one rises in from `70%` on the spring; going down, both move the other way. Rapid taps retarget from where the outgoing number is. Steppers, counts, badges. Rolling numbers for big stats. SwiftUI: `.contentTransition(.numericText(value:))`. |
 | **Toast** | Slides up from below + fade, spring. Auto-hides after 2.5s with `--ease-in`. |
-| **Sheet / dialog** | Mobile: `translateY(105%) → 0` spring + **Push back**. ≥ 640px: centered dialog, `translate(-50%,-46%) scale(0.96) → center, scale 1` spring + fade. Scrim fades with a 6px backdrop blur. |
+| **Sheet / dialog** | Mobile: `translateY(105%) → 0` spring + **Push back**, dismiss by dragging down (§2). ≥ 640px: centered dialog, `translate(-50%,-46%) scale(0.96) → center, scale 1` spring + fade. Scrim fades with a 6px backdrop blur. |
 | **Tab change** | Liquid indicator slides; content + header Blur-swap (out 160ms `--ease-in`, in on the spring); scroll resets to top. |
 | **Scroll edges** | Content fades + blurs into the top/bottom edge of every scroll area (components.md › Scroll-edge fade). Edges appear/disappear with `--dur-base`. |
 | **Hover (web)** | Whole row/item fills with `press` in `--dur-fast`. No lift, no scale. |
 | **List insert/remove** | Height + opacity, spring; neighbors follow. |
+
+## Haptics (native)
+
+Feedback you feel confirms what happened; it never decorates. iOS: SwiftUI `.sensoryFeedback(…, trigger:)`. Expo: `expo-haptics`. Web: none (except `navigator.vibrate(10)` for a long-press on Android).
+
+| Moment | iOS (`SensoryFeedback`) | Expo (`expo-haptics`) |
+|---|---|---|
+| Toggle, check, segmented/tab change, stepper, picker or slider step, chart scrub step | `.selection` | `selectionAsync()` |
+| Long-press opens a context menu, swipe crosses the delete threshold, sheet drag crosses the close threshold | `.impact(weight: .light)` | `impactAsync(Light)` |
+| Something finished that took a moment (sent, saved, synced) | `.success` | `notificationAsync(Success)` |
+| Confirm before a destructive action | `.warning` | `notificationAsync(Warning)` |
+| Rejected input (with Shake on error) | `.error` | `notificationAsync(Error)` |
+
+Never on scroll, on every keystroke, on screen load, or twice for one action. Native controls (Toggle, Picker, context menus) already play their own — don't add a second one.
 
 ## Signature effects
 
@@ -33,6 +47,16 @@ When a sheet/modal opens, the screen behind recedes like an iOS card stack.
 - Behind layer: `translateY(14px) scale(0.92)`, radius → 26, `brightness(0.75)`, transform-origin top center. The area behind it is black.
 - Sheet top sits ~40px from the top; spring for both, in sync.
 - Native: iOS `.sheet` already does this on iPhone — use the native sheet. Web/RN: implement as above.
+
+### 2 · Drag to dismiss
+Every bottom sheet can be grabbed and pulled down to close, like iOS.
+- Grab anywhere on the sheet except inputs and buttons; inside scrolling content, only once it's scrolled to the top.
+- Down follows the finger 1:1. Up resists: offset `−√|dy| × 4`, so it barely moves.
+- While dragging, everything tracks the finger with no transition: the scrim fades `1 → 0` and the Push back screen comes forward (scale `0.92 → 1`, `translateY 14 → 0`, radius `26 → 0`, brightness `0.75 → 1`) by the same progress (`offset ÷ sheet height`).
+- Release: past ⅓ of the sheet's height, or a downward flick faster than 0.5 px/ms → close on the spring from where it is. Otherwise spring back open.
+- The close button, a scrim tap and Escape still work. Reduced motion: dragging still tracks, the release fades instead of sliding.
+- Centered dialogs (≥ 640px) don't drag.
+- Native: iOS `.sheet` and React Navigation form sheets do this already; never block it (`interactiveDismissDisabled` only for unsaved input, with a confirm).
 
 ### 3 · Rolling numbers
 Big stats (stat/display sizes) roll each digit like a mechanical counter.
@@ -69,7 +93,7 @@ A rejected input (wrong password, invalid code) shakes "no".
 
 ### 8 · Liquid tabs
 Segmented controls and tab pills: the selection indicator stretches as it travels.
-- Indicator is an `ink` pill positioned by `left` and `right`.
+- Indicator is a pill positioned by `left` and `right`. Its color comes from the component: `surface` on a `track` segmented control, `bg` in the tab bar (components.md).
 - Moving right: `right` edge uses the **fast** spring, `left` edge the **slow** spring (reverse when moving left), so it leads, stretches, and catches up.
-- The newly selected label turns `on-ink`; the screen title updates with Blur swap.
+- The newly selected label turns `ink` 600; the screen title updates with Blur swap.
 - Native: SwiftUI `matchedGeometryEffect` with two springs, or Reanimated with separate shared values per edge.
