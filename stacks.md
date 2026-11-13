@@ -65,6 +65,7 @@ export const useTheme = () => theme(useColorScheme() === 'dark' ? 'dark' : 'ligh
 - Native controls (`Switch`, tabs, sheets) tinted with `ink`. Light haptic on check and primary button.
 - Scroll-edge fade: `MaskedView` (@react-native-masked-view/masked-view) with an `expo-linear-gradient` mask on the ScrollView, plus an `expo-blur` `BlurView` strip at each edge (intensity ~20) shown only when scrollable that way.
 - Press: Reanimated scale `motion.pressScale` (0.96) with `withSpring(…, motion.spring.default)`. All motion specs: `motion.md`.
+- Gestures: Gesture Handler `onEnd` passes its velocity to the spring, `withSpring(to, { ...motion.spring.default, velocity })`; `onBegin` cancels the running animation (`cancelAnimation`) so a grab stops it where it is.
 
 ## SwiftUI
 
@@ -103,7 +104,7 @@ Tight tracking: `.tracking(-1.1)` on title1, `-1` on stat, `-0.5` on title2. Lar
 - Scroll-edge fade: iOS 26 `.scrollEdgeEffectStyle(.soft, for: .all)`; earlier iOS: `.mask` with a `LinearGradient` at the edges.
 - Sheets: `.sheet` + `.presentationDetents` on iPhone, `.presentationSizing(.form)` on iPad & Mac.
 
-**Motion.** `.spring(response: 0.32, dampingFraction: 0.77)` (= stiffness 380 / damping 30, see `motion.md`). Honor `@Environment(\.accessibilityReduceMotion)`. Light `.sensoryFeedback(.impact(weight: .light), trigger:)` on check and primary button.
+**Motion.** `.spring(response: 0.25, dampingFraction: 0.88)` (= stiffness 620 / damping 44, see `motion.md`). Drags hand their release velocity to the spring: in `onEnded` use `.interpolatingSpring(mass: 1, stiffness: 620, damping: 44, initialVelocity:)`. Prefer native transitions that already do this: `.navigationTransition(.zoom(…))` for Zoom open and Photo fly-in, `.swipeActions(allowsFullSwipe: true)` for Armed swipe, `.onMove` for Lift to reorder. Honor `@Environment(\.accessibilityReduceMotion)`. Light `.sensoryFeedback(.impact(weight: .light), trigger:)` on check and primary button.
 
 ## Other (emails, slides, docs)
 Same palette and Figtree, grey `bg` with light islands, one ink button. Slides: title1/display sizes, one idea per slide.

@@ -38,6 +38,8 @@ Run before saying UI work is finished. Check against the actual code/screens, fi
 - [ ] 360px wide works, no horizontal scroll; touch targets ≥ 44px
 - [ ] Visible keyboard focus; essential text uses `ink` / `ink-2` only
 - [ ] Motion only on state change; reduced motion respected
+- [ ] Drags hand their release velocity to the spring; moving things can be grabbed mid-flight; flicks commit (`motion.md` › Physics and gestures)
+- [ ] Every gesture action (swipe, reorder, edge-back) also has a button, menu or keyboard way
 - [ ] Dialogs and sheets: focus moves in, stays in, Escape closes, focus returns; background inert; close button present
 - [ ] Reduced transparency drops blurs; increased contrast works (`foundations.md` › Accessibility)
 - [ ] Native: haptics only at the moments in `motion.md` › Haptics

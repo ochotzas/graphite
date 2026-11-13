@@ -48,3 +48,6 @@ These are default habits that break Graphite or make UI look generic/AI-made.
 | Blobs, orbs, robots, glowing brains as visuals | The real product, built in code with plausible data |
 | Unsourced social proof ("Loved by 10,000+ teams") | Ask if real; quiet and specific, or remove |
 | `animate-pulse` / `ping` on things that aren't live, `transition-all` | Static; transition named properties only |
+| A dragged sheet or row that ignores how fast it was let go, or snaps back on a fixed curve | Release velocity goes to the spring; a flick commits |
+| Animations that block input until they finish, or restart from their start on a new tap | Interruptible: retarget from the current value and velocity |
+| Hard stop at a drag limit | Rubber-band past it (√ resistance) |
