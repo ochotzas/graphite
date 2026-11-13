@@ -95,11 +95,11 @@ export const type = {
 // SwiftUI: .spring(response: 0.25, dampingFraction: 0.88). Fast: (0.22, 0.88). Slow: (0.30, 0.88).
 export const motion = {
   spring: {
-    default: { stiffness: 620, damping: 44, mass: 1 }, // everything that moves (~320ms, 0.3% overshoot)
-    fast:    { stiffness: 837, damping: 51, mass: 1 }, // liquid tabs leading edge (~280ms)
-    slow:    { stiffness: 434, damping: 37, mass: 1 }, // liquid tabs trailing edge (~370ms)
+    default: { stiffness: 620, damping: 44, mass: 1 }, // everything that moves (~350ms, 0.3% overshoot)
+    fast:    { stiffness: 837, damping: 51, mass: 1 }, // liquid tabs leading edge (~310ms)
+    slow:    { stiffness: 434, damping: 37, mass: 1 }, // liquid tabs trailing edge (~420ms)
   },
-  duration: { fast: 120, base: 220, spring: 320 },
+  duration: { fast: 120, base: 220, spring: 350 },
   easing: { out: [0.2, 0, 0, 1], in: [0.4, 0, 1, 1] },
   pressScale: 0.96,
   pushBack: { scale: 0.92, translateY: 14, radius: 26, brightness: 0.75 },

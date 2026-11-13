@@ -1,10 +1,10 @@
 # Motion — "Spring"
 
-The iOS feel: snappy, physical, with a settle you can't see (~0.3% overshoot, done in ~320ms). Nothing floats, nothing bounces for show. Gestures hand their speed to the spring, so a flick keeps moving and a grab stops it dead.
+The iOS feel: snappy, physical, with a settle you can't see (~0.3% overshoot, done in ~350ms). Nothing floats, nothing bounces for show. Gestures hand their speed to the spring, so a flick keeps moving and a grab stops it dead.
 Working reference for every effect below: **`examples/motion.html`** — copy from it.
 
 ## The base rules
-- **Anything that moves uses the spring:** stiffness 620, damping 44, mass 1. CSS: `var(--dur-spring) var(--spring)` (320ms). Reanimated: `withSpring(v, motion.spring.default)`. SwiftUI: `.spring(response: 0.25, dampingFraction: 0.88)`. JS physics: `spring()` in `examples/motion.html`.
+- **Anything that moves uses the spring:** stiffness 620, damping 44, mass 1. CSS: `var(--dur-spring) var(--spring)` (350ms). Reanimated: `withSpring(v, motion.spring.default)`. SwiftUI: `.spring(response: 0.25, dampingFraction: 0.88)`. JS physics: `spring()` in `examples/motion.html`.
 - **Color/opacity-only changes** use `--dur-base` + `--ease-out`. Exits that leave the screen use `--ease-in`, ~70% of enter time.
 - Animate only `transform`, `opacity`, `filter`. Animate layout (height) only for list insert/remove.
 - **Interruptible:** a new tap/gesture retargets from the current position and velocity (see Physics and gestures).
@@ -94,7 +94,7 @@ Screens with a scrollable list have a big title1 that scrolls away into a compac
 
 ### 6 · Swipe to delete
 List rows in islands can be swiped left to reveal a `danger` Delete action.
-- Drag follows the finger 1:1 to −90px, then rubber-bands at 0.6×. Dragging right resists at 0.25×. Horizontal only after the direction lock.
+- Drag follows the finger 1:1 to −90px, then rubber-bands with √ resistance (f = 5). Dragging right resists at 0.25×. Horizontal only after the direction lock.
 - Release: past 55% of width → delete (slide out with `--ease-in` 220ms, then collapse height with spring). Past −45px → snap open at −90px. Otherwise spring back to 0, with the release velocity.
 - Tapping the revealed action deletes. Always offer Undo via toast.
 
@@ -107,7 +107,7 @@ A rejected input (wrong password, invalid code) shakes "no".
 ### 8 · Liquid tabs
 Segmented controls and tab pills: the selection indicator stretches as it travels.
 - Indicator is a pill positioned by `left` and `right`. Its color comes from the component: `surface` on a `track` segmented control, `bg` in the tab bar (components.md).
-- Moving right: `right` edge uses the **fast** spring (837 / 51, ~280ms), `left` edge the **slow** spring (434 / 37, ~370ms) (reverse when moving left), so it leads, stretches, and catches up.
+- Moving right: `right` edge uses the **fast** spring (837 / 51, ~310ms), `left` edge the **slow** spring (434 / 37, ~420ms) (reverse when moving left), so it leads, stretches, and catches up.
 - Tapping again mid-move retargets both edges from where they are and how fast they move.
 - The newly selected label turns `ink` 600; the screen title updates with Blur swap.
 - Native: SwiftUI `matchedGeometryEffect` with two springs, or Reanimated with separate shared values per edge.
