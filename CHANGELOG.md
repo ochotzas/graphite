@@ -2,6 +2,14 @@
 
 Graphite by Olger Chotza — https://ochotzas.com
 
+## 2.1.0 — 2026-11-13
+- Snappier spring: stiffness 620, damping 44 (was 380 / 30). ~0.3% overshoot, settles in ~320ms. SwiftUI `.spring(response: 0.25, dampingFraction: 0.88)`.
+- Liquid tab edges keep the default's damping ratio: fast 837 / 51 (~280ms), slow 434 / 37 (~370ms).
+- Physics and gestures in `motion.md`: release velocity goes to the spring, everything is interruptible, √ rubber-banding, fling thresholds, direction lock.
+- New signature effects: Zoom open, Photo fly-in, Armed swipe, Lift to reorder, Morphing button. Drag to dismiss now flings with velocity.
+- `examples/motion.html`: a velocity-aware `spring()` and `velocityTracker()`, demos for every new effect, sheet drag and liquid tabs on physics.
+- Checklist, anti-patterns, components and stacks updated for velocity and interruptible gestures.
+
 ## 2.0.0 — 2026-11-12
 - Soft color: `accent` (links, focus, now), `success` / `warning` / `danger` with tints, and six category colors, all at graphite's lightness and low chroma. Ink stays the emphasis; color only carries meaning.
 - `danger` softened to match (`#AB413A` light, `#F2897E` dark).

@@ -91,14 +91,15 @@ export const type = {
 } as const;
 
 // "Spring" feel. Use springs for anything that moves; timing curves only for color/opacity/exits.
-// Reanimated: withSpring(v, motion.spring.default). SwiftUI: .spring(response: 0.32, dampingFraction: 0.77).
+// Reanimated: withSpring(v, motion.spring.default), with velocity: withSpring(v, { ...motion.spring.default, velocity }).
+// SwiftUI: .spring(response: 0.25, dampingFraction: 0.88). Fast: (0.22, 0.88). Slow: (0.30, 0.88).
 export const motion = {
   spring: {
-    default: { stiffness: 380, damping: 30, mass: 1 }, // everything that moves (~470ms, 1.6% overshoot)
-    fast:    { stiffness: 520, damping: 34, mass: 1 }, // liquid tabs leading edge
-    slow:    { stiffness: 260, damping: 26, mass: 1 }, // liquid tabs trailing edge
+    default: { stiffness: 620, damping: 44, mass: 1 }, // everything that moves (~320ms, 0.3% overshoot)
+    fast:    { stiffness: 837, damping: 51, mass: 1 }, // liquid tabs leading edge (~280ms)
+    slow:    { stiffness: 434, damping: 37, mass: 1 }, // liquid tabs trailing edge (~370ms)
   },
-  duration: { fast: 120, base: 220, spring: 470 },
+  duration: { fast: 120, base: 220, spring: 320 },
   easing: { out: [0.2, 0, 0, 1], in: [0.4, 0, 1, 1] },
   pressScale: 0.96,
   pushBack: { scale: 0.92, translateY: 14, radius: 26, brightness: 0.75 },

@@ -36,7 +36,7 @@ For all UI work, read <path-to-graphite>/SKILL.md and follow it, including its c
 ### Just the tokens
 Install from GitHub, pinned to a release:
 ```sh
-npm install github:ochotzas/graphite#v2.0.0
+npm install github:ochotzas/graphite#v2.1.0
 ```
 Then `@import "@ochotzas/graphite/tokens.css";` in CSS, or `import { theme } from "@ochotzas/graphite/tokens";` in TS. Or copy `tokens/tokens.css` / `tokens/tokens.ts` into your project. `stacks.md` shows the setup for each stack.
 
@@ -51,7 +51,7 @@ Live at [ochotzas.com/skills/graphite](https://ochotzas.com/skills/graphite), wi
 | `tokens/` | Colors, type, spacing, radius, motion as CSS and TypeScript |
 | `foundations.md` | Color, type, spacing, radius, layout, icons |
 | `components.md` | Islands, rows, buttons, checks, inputs, navigation, sheets, states |
-| `motion.md` | The spring and 8 signature effects |
+| `motion.md` | The spring, gesture physics and 13 signature effects |
 | `stacks.md` | Setup for Tailwind, React, React Native/Expo, SwiftUI |
 | `voice.md` | How UI text is written |
 | `anti-patterns.md` | What agents typically get wrong |

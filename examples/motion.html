@@ -120,16 +120,76 @@
   .tabs { position: relative; display: flex; padding: 4px; border-radius: 99px; background: var(--track); }
   .tabs button { position: relative; z-index: 1; flex: 1; height: 40px; border: 0; background: none; font: 500 14px var(--font); color: var(--ink-2); cursor: pointer; transition: color 200ms; }
   .tabs button[aria-pressed="true"] { color: var(--ink); font-weight: 600; }
-  .tab-ind { position: absolute; top: 4px; bottom: 4px; border-radius: 99px; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .tab-ind { position: absolute; top: 4px; bottom: 4px; left: 0; border-radius: 99px; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
   .tabbar { position: absolute; left: 14px; right: 14px; bottom: 16px; }
+  .icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+  .black { background: #000; }
+  .ghost { position: absolute; left: 0; top: 0; z-index: 8; pointer-events: none; transform-origin: 0 0; will-change: transform; }
+  .popin { animation: popin var(--dur-spring) var(--spring); }
+  .blur-out { animation: blur-out 160ms var(--ease-in) forwards; }
+  .blur-in { animation: blur-in var(--dur-spring) var(--spring); }
+  @keyframes popin { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+  @keyframes blur-out { to { opacity: 0; filter: blur(8px); transform: translateY(-4px) scale(0.98); } }
+  @keyframes blur-in { from { opacity: 0; filter: blur(8px); transform: translateY(6px) scale(0.98); } to { opacity: 1; filter: none; transform: none; } }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  .zoom-under { transform-origin: 50% 0; }
+  .zoom-cards { display: flex; flex-direction: column; gap: var(--island-gap); }
+  .zoom-card { display: block; width: 100%; padding: 0; border: 0; text-align: left; font: inherit; color: inherit; background: var(--surface); border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; transition: transform var(--dur) var(--ease); -webkit-tap-highlight-color: transparent; }
+  .zoom-card:active { transform: scale(var(--press)); transition-duration: 90ms; }
+  .zoom-card .cover { display: block; height: 92px; }
+  .zoom-card-text { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px; font-weight: 500; }
+  .zoom-detail { padding: 0; z-index: 2; overflow: hidden; touch-action: pan-y; }
+  .zoom-hero { height: 170px; flex: none; }
+  .zoom-body { padding: 16px 18px; }
+  .zoom-body .title { margin: 0 0 6px; }
+  .icon-btn { position: absolute; top: 14px; left: 14px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+
+  .thumb { flex: none; width: 40px; height: 40px; border-radius: var(--radius-sm); }
+  .fly-screen { transform-origin: 50% 0; }
+  .fly-scrim { position: absolute; inset: 0; background: var(--scrim); opacity: 0; pointer-events: none; z-index: 4; }
+  .fly-scrim.on { pointer-events: auto; }
+  .fly-sheet { position: absolute; left: 0; right: 0; bottom: 0; top: 40px; z-index: 5; background: var(--bg); border-radius: 28px 28px 0 0; overflow: hidden; touch-action: none; cursor: grab; box-shadow: var(--shadow-float); }
+  .fly-sheet[hidden] { display: none; }
+  .fly-hero { height: 150px; border-radius: 28px 28px 0 0; }
+  .fly-body { padding: 16px 18px; }
+  .fly-body .sheet-head { margin-bottom: 6px; }
+
+  .armed-row { position: relative; overflow: hidden; background: var(--success-tint); }
+  .armed-row.is-done { background: var(--track); }
+  .armed-row + .armed-row .armed-front { box-shadow: inset 0 1px 0 var(--line); }
+  .armed-action { position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-right: 18px; font-weight: 600; font-size: 15px; }
+  .armed-disc { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--success); color: var(--on-ink); transform: scale(0.6); transition: transform var(--dur) var(--ease); }
+  .is-done .armed-disc { background: var(--ink-2); }
+  .armed-disc svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .armed .armed-disc { transform: scale(1.12); }
+  .armed-front { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; background: var(--surface); touch-action: pan-y; cursor: grab; user-select: none; will-change: transform; }
+
+  .reorder { position: relative; }
+  .reorder-row { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 6px 0 16px; background: var(--surface); user-select: none; -webkit-touch-callout: none; }
+  .reorder-row + .reorder-row { box-shadow: inset 0 1px 0 var(--line); }
+  .reorder-row .grip { flex: none; width: 40px; height: 40px; border: 0; border-radius: 50%; background: none; color: var(--ink-3); display: grid; place-items: center; cursor: grab; touch-action: none; }
+  .reorder-row.lifted { z-index: 3; border-radius: var(--radius-md); box-shadow: var(--shadow-float); }
+  .reorder-row.lifted + .reorder-row { box-shadow: none; }
+  .reorder-row.sliding { transition: transform var(--dur) var(--ease); }
+  .island-clip { border-radius: var(--radius-lg); }
+
+  .morph-wrap { display: flex; justify-content: center; }
+  .morph { position: relative; width: 100%; overflow: hidden; white-space: nowrap; }
+  .morph:disabled { cursor: default; }
+  .morph-ring, .morph-done { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; }
+  .morph-ring svg { width: 30px; height: 30px; fill: none; stroke: var(--on-ink); }
+  .morph-ring .trk { opacity: 0.25; }
+  .morph-done { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .morph-done svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="ck" viewBox="0 0 12 12"><path d="M2.5 6.3l2.3 2.2L9.5 3.5"/></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="ck" viewBox="0 0 12 12"><path d="M2.5 6.3l2.3 2.2L9.5 3.5"/></symbol><symbol id="back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol><symbol id="grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></symbol></svg>
 
 <main class="page">
   <h1 class="h1">Motion</h1>
-  <p class="lead">Graphite moves with one spring (stiffness 380, damping 30). Reference implementation for <code>motion.md</code> — copy from here.</p>
+  <p class="lead">Graphite moves with one spring (stiffness 620, damping 44). Gestures hand their release speed to it, and anything moving can be grabbed. Reference implementation for <code>motion.md</code> — copy from here.</p>
 
   <!-- ================= Everyday ================= -->
   <div class="sec-head">
@@ -232,6 +292,69 @@
       </div></div>
     </section>
 
+    <section class="card">
+      <header><p class="label"><b>9</b>Zoom open</p><p class="footnote">The card grows into its screen and the image flies to the header. Drag from the left edge to shrink it back.</p></header>
+      <div class="stage short black" id="zoom">
+        <div class="screen zoom-under">
+          <p class="title" style="margin-top:0">Trips</p>
+          <div class="zoom-cards">
+            <button class="zoom-card" data-trip="0"><span class="cover" style="background:var(--cat-slate)"></span><span class="zoom-card-text">Lisbon<span class="footnote">4 days</span></span></button>
+            <button class="zoom-card" data-trip="1"><span class="cover" style="background:var(--cat-sage)"></span><span class="zoom-card-text">Porto<span class="footnote">3 days</span></span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <header><p class="label"><b>10</b>Photo fly-in</p><p class="footnote">The thumbnail flies into the sheet header, and back when the sheet closes. Fling the sheet down to close it.</p></header>
+      <div class="stage short black" id="fly">
+        <div class="screen fly-screen">
+          <p class="title" style="margin-top:0">Packing</p>
+          <div class="island" style="overflow:hidden" id="fly-list"></div>
+        </div>
+        <div class="fly-scrim" id="fly-scrim"></div>
+        <div class="fly-sheet" id="fly-sheet" role="dialog" aria-modal="true" aria-labelledby="fly-title" hidden>
+          <div class="fly-hero" id="fly-hero"></div>
+          <div class="fly-body"><div class="sheet-head"><span id="fly-title"></span><button class="btn btn-secondary btn-sm" id="fly-close">Done</button></div><p class="footnote">Pull down or flick to close.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <header><p class="label"><b>11</b>Armed swipe</p><p class="footnote">Swipe a row left. Past the line the action arms; let go to run it. A quick flick runs it too.</p></header>
+      <div class="stage short"><div class="screen">
+        <p class="title" style="margin-top:0">Today</p>
+        <div class="island" style="overflow:hidden" id="armed-list"></div>
+      </div></div>
+    </section>
+
+    <section class="card">
+      <header><p class="label"><b>12</b>Lift to reorder</p><p class="footnote">Long-press a row or grab its handle. Keyboard: focus a handle, Space to lift, arrows to move.</p></header>
+      <div class="stage short">
+        <div class="scroller" id="reorder-scroller" style="padding-top:22px">
+          <p class="title" style="margin-top:0">Route</p>
+          <div class="island reorder island-clip" id="reorder-list"></div>
+        </div>
+        <p class="sr-only" aria-live="polite" id="reorder-status"></p>
+      </div>
+    </section>
+
+    <section class="card">
+      <header><p class="label"><b>13</b>Morphing button</p><p class="footnote">The button becomes its own progress ring, then a check.</p></header>
+      <div class="stage short"><div class="screen">
+        <p class="title" style="margin-top:0">Menu</p>
+        <p class="footnote">3 changes ready to go live.</p>
+        <div class="bottom morph-wrap">
+          <button class="btn btn-primary morph" id="morph">
+            <span class="morph-label" id="morph-label">Publish 3 changes</span>
+            <span class="morph-ring" id="morph-ring" aria-hidden="true"><svg viewBox="0 0 32 32"><circle class="trk" cx="16" cy="16" r="12" stroke-width="3"/><circle id="morph-arc" cx="16" cy="16" r="12" stroke-width="3" stroke-linecap="round" stroke-dasharray="75.4" stroke-dashoffset="75.4" transform="rotate(-90 16 16)"/></svg></span>
+            <span class="morph-done" id="morph-done"><svg><use href="#ck"/></svg>Live</span>
+          </button>
+        </div>
+        <p class="sr-only" role="status" id="morph-status"></p>
+      </div></div>
+    </section>
+
   </div>
 </main>
 
@@ -243,6 +366,44 @@ const DEFAULT = { ...token('--spring', '--dur-spring'), pop: 0.6, blur: 0 };
 const FAST = token('--spring-fast', '--dur-spring-fast'), SLOW = token('--spring-slow', '--dur-spring-slow');
 const FEELS = [{ k: '✓', name: 'Spring', desc: 'Tap tasks and “New task” — the sheet uses Push back.', ...DEFAULT }];
 const ck = '<svg><use href="#ck"/></svg>';
+const PHYSICS = { default: { k: 620, c: 44 }, fast: { k: 837, c: 51 }, slow: { k: 434, c: 37 } };
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const buzz = () => { try { navigator.vibrate?.(8); } catch {} };
+const spring = ({ from, to, velocity = 0, onUpdate, onDone, precision = 0.3, k = PHYSICS.default.k, c = PHYSICS.default.c }) => {
+  let x = from, v = velocity, raf = 0, stopped = false, last = performance.now();
+  const handle = { stop() { stopped = true; cancelAnimationFrame(raf); }, get value() { return x; }, get velocity() { return v; } };
+  const tick = (now) => {
+    if (stopped) return;
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const n = Math.max(1, Math.ceil(dt * 240)), h = dt / n;
+    for (let i = 0; i < n; i++) { const a = -k * (x - to) - c * v; v += a * h; x += v * h; }
+    if (Math.abs(v) < precision * 4 && Math.abs(x - to) < precision) { x = to; onUpdate(x); stopped = true; onDone?.(); return; }
+    onUpdate(x); raf = requestAnimationFrame(tick);
+  };
+  raf = requestAnimationFrame(tick);
+  return handle;
+};
+const velocityTracker = () => {
+  let pts = [];
+  return {
+    add(x, y) { const t = performance.now(); pts.push({ x, y, t }); pts = pts.filter(p => t - p.t < 90); },
+    get() { if (pts.length < 2) return { vx: 0, vy: 0 }; const a = pts[0], b = pts[pts.length - 1], dt = Math.max(1, b.t - a.t); return { vx: (b.x - a.x) / dt * 1000, vy: (b.y - a.y) / dt * 1000 }; }
+  };
+};
+const relRect = (el, stage) => { const r = el.getBoundingClientRect(), s = stage.getBoundingClientRect(); return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height }; };
+const flyGhost = (stage, color, fromRect, toRectFn, radiusFrom, radiusTo, onDone) => {
+  const ghost = document.createElement('div'); ghost.className = 'ghost'; ghost.style.background = color;
+  stage.appendChild(ghost);
+  const draw = (p) => {
+    const to = toRectFn();
+    ghost.style.width = lerp(fromRect.w, to.w, p) + 'px'; ghost.style.height = lerp(fromRect.h, to.h, p) + 'px';
+    ghost.style.transform = `translate(${lerp(fromRect.x, to.x, p)}px, ${lerp(fromRect.y, to.y, p)}px)`;
+    ghost.style.borderRadius = lerp(radiusFrom, radiusTo, clamp(p, 0, 1)) + 'px';
+  };
+  draw(0);
+  spring({ from: 0, to: 1, precision: 0.001, onUpdate: draw, onDone: () => { ghost.remove(); onDone?.(); } });
+};
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function rollNumber(el, value, spring) {
   const current = [...el.children].filter(c => !c.dataset.leaving).pop();
@@ -310,11 +471,11 @@ document.addEventListener('click', e => {
 
 document.querySelectorAll('.stage .sheet').forEach(panel => {
   const stage = panel.closest('.stage'), scrim = stage.querySelector(':scope > .scrim'), screen = stage.classList.contains('e1') ? stage.querySelector('.screen') : null;
-  let startY = 0, lastY = 0, lastT = 0, velocity = 0, offset = 0, dragging = false;
+  let startY = 0, offset = 0, dragging = false, tracker = null, settling = null;
   const resist = dy => dy >= 0 ? dy : -Math.sqrt(-dy) * 4;
-  const paint = () => {
-    const progress = Math.min(1, Math.max(0, offset / panel.offsetHeight));
-    panel.style.transform = `translateY(${resist(offset)}px)`;
+  const paint = (y) => {
+    const progress = clamp(y / panel.offsetHeight, 0, 1);
+    panel.style.transform = `translateY(${y}px)`;
     scrim.style.opacity = String(1 - progress);
     if (screen) {
       screen.style.transform = `translateY(${14 * (1 - progress)}px) scale(${0.92 + 0.08 * progress})`;
@@ -322,29 +483,35 @@ document.querySelectorAll('.stage .sheet').forEach(panel => {
       screen.style.filter = `brightness(${0.75 + 0.25 * progress})`;
     }
   };
-  const clear = () => {
-    stage.classList.remove('dragging');
-    [panel, scrim, screen].forEach(el => el && el.removeAttribute('style'));
-  };
+  const clear = () => [panel, scrim, screen].forEach(el => el && el.removeAttribute('style'));
+  const currentY = () => new DOMMatrix(getComputedStyle(panel).transform).m42;
   panel.addEventListener('pointerdown', e => {
     if (!stage.classList.contains('open') || e.button !== 0 || e.target.closest('input, button')) return;
-    dragging = true; startY = lastY = e.clientY; lastT = e.timeStamp; velocity = 0; offset = 0;
+    const y = currentY();
+    settling?.stop(); settling = null;
+    dragging = true; offset = Math.max(0, y); startY = e.clientY - offset;
+    tracker = velocityTracker(); tracker.add(0, e.clientY);
     panel.setPointerCapture(e.pointerId);
     stage.classList.add('dragging');
+    paint(offset);
   });
   panel.addEventListener('pointermove', e => {
     if (!dragging) return;
-    velocity = 0.8 * ((e.clientY - lastY) / Math.max(1, e.timeStamp - lastT)) + 0.2 * velocity;
-    lastY = e.clientY; lastT = e.timeStamp; offset = e.clientY - startY;
-    paint();
+    tracker.add(0, e.clientY);
+    offset = e.clientY - startY;
+    paint(resist(offset));
   });
   const end = () => {
     if (!dragging) return;
     dragging = false;
-    const dismiss = offset > panel.offsetHeight / 3 || (velocity > 0.5 && offset > 0);
-    panel.getBoundingClientRect();
-    clear();
-    if (dismiss) stage.classList.remove('open');
+    const { vy } = tracker.get(), height = panel.offsetHeight;
+    const dismiss = (offset > height / 3 && vy > -700) || vy > 700;
+    settling = spring({ from: resist(offset), to: dismiss ? height : 0, velocity: vy, onUpdate: paint, onDone: () => {
+      settling = null;
+      if (dismiss) stage.classList.remove('open');
+      clear();
+      requestAnimationFrame(() => stage.classList.remove('dragging'));
+    } });
   };
   panel.addEventListener('pointerup', end);
   panel.addEventListener('pointercancel', end);
@@ -459,21 +626,371 @@ document.getElementById('playall').onclick = () => {
 (() => {
   const tabs = document.getElementById('tabs'), ind = document.getElementById('tab-ind'), title = document.getElementById('tab-title');
   const btns = [...tabs.querySelectorAll('button')];
-  const fast = FAST, slow = SLOW;
-  const edges = b => ({ l: b.offsetLeft, r: tabs.clientWidth - b.offsetLeft - b.offsetWidth });
-  let cur = edges(btns[0]); ind.style.left = cur.l + 'px'; ind.style.right = cur.r + 'px';
-  addEventListener('resize', () => { const b = btns.find(x => x.getAttribute('aria-pressed') === 'true'); cur = edges(b); ind.style.left = cur.l + 'px'; ind.style.right = cur.r + 'px'; });
+  let left = 0, right = 0, edgeAnims = [];
+  const draw = () => { ind.style.transform = `translateX(${left}px)`; ind.style.width = `${right - left}px`; };
+  const place = (b, animate) => {
+    const toLeft = b.offsetLeft, toRight = b.offsetLeft + b.offsetWidth;
+    const [leftVelocity = 0, rightVelocity = 0] = edgeAnims.map(a => a.velocity);
+    edgeAnims.forEach(a => a.stop());
+    if (!animate) { left = toLeft; right = toRight; draw(); return; }
+    const movingRight = toRight > right;
+    edgeAnims = [
+      spring({ from: left, to: toLeft, velocity: leftVelocity, ...(movingRight ? PHYSICS.slow : PHYSICS.fast), onUpdate: v => { left = v; draw(); } }),
+      spring({ from: right, to: toRight, velocity: rightVelocity, ...(movingRight ? PHYSICS.fast : PHYSICS.slow), onUpdate: v => { right = v; draw(); } })
+    ];
+  };
+  const selected = () => btns.find(x => x.getAttribute('aria-pressed') === 'true');
+  place(selected(), false);
+  addEventListener('resize', () => place(selected(), false));
   btns.forEach(b => b.onclick = () => {
-    const to = edges(b), right = to.l > cur.l;
-    ind.getAnimations().forEach(a => a.cancel());
-    ind.style.left = to.l + 'px'; ind.style.right = to.r + 'px';
-    ind.animate({ left: [cur.l + 'px', to.l + 'px'] }, { duration: (right ? slow : fast).dur, easing: (right ? slow : fast).easing });
-    ind.animate({ right: [cur.r + 'px', to.r + 'px'] }, { duration: (right ? fast : slow).dur, easing: (right ? fast : slow).easing });
-    cur = to;
+    if (b === selected()) return;
     btns.forEach(x => x.setAttribute('aria-pressed', x === b));
+    place(b, true);
     title.textContent = b.textContent;
     title.animate([{ opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0)' }], { duration: 260, easing: 'ease-out' });
   });
+})();
+
+(() => {
+  const stage = document.getElementById('zoom'), under = stage.querySelector('.zoom-under');
+  const trips = [['Lisbon', 'var(--cat-slate)', '4 days, 9 places saved. Trams, tiles and custard tarts.'], ['Porto', 'var(--cat-sage)', '3 days, 6 places saved. River walks and port lodges.']];
+  let open = null;
+  const scaled = (r, s, width) => ({ x: width / 2 + (r.x - width / 2) * s, y: r.y * s, w: r.w * s, h: r.h * s });
+  const buildDetail = ([name, color, text]) => {
+    const detail = document.createElement('div');
+    detail.className = 'screen zoom-detail';
+    detail.innerHTML = `<div class="zoom-hero" style="background:${color}"></div><button class="icon-btn" aria-label="Back"><svg class="icon"><use href="#back"/></svg></button><div class="zoom-body"><p class="title">${name}</p><p class="footnote">${text}</p></div>`;
+    return detail;
+  };
+  const zoomOpen = (card) => {
+    if (open) return;
+    const [, color] = trips[+card.dataset.trip];
+    const detail = buildDetail(trips[+card.dataset.trip]);
+    stage.appendChild(detail);
+    const hero = detail.querySelector('.zoom-hero'), cover = card.querySelector('.cover');
+    const width = stage.clientWidth, height = stage.clientHeight;
+    const cardRect = relRect(card, stage), coverRect = relRect(cover, stage), heroRect = relRect(hero, stage);
+    const ghost = document.createElement('div'); ghost.className = 'ghost'; ghost.style.background = color; stage.appendChild(ghost);
+    const entry = { p: 0, anim: null };
+    const hideReal = () => { ghost.style.display = ''; hero.style.visibility = 'hidden'; cover.style.visibility = 'hidden'; };
+    const render = (p) => {
+      entry.p = p;
+      const s = 1 - 0.06 * p, c = scaled(cardRect, s, width), from = scaled(coverRect, s, width);
+      under.style.transform = `scale(${s})`; under.style.filter = `brightness(${1 - 0.18 * p})`; under.style.borderRadius = `${30 * p}px`;
+      const inset = [lerp(c.y, 0, p), lerp(width - c.x - c.w, 0, p), lerp(height - c.y - c.h, 0, p), lerp(c.x, 0, p)].map(v => Math.max(0, v) + 'px').join(' ');
+      detail.style.clipPath = `inset(${inset} round ${Math.max(0, lerp(22 * s, 0, p))}px)`;
+      detail.querySelector('.zoom-body').style.opacity = String(clamp(p * 3 - 1, 0, 1));
+      ghost.style.width = lerp(from.w, heroRect.w, p) + 'px'; ghost.style.height = lerp(from.h, heroRect.h, p) + 'px';
+      ghost.style.transform = `translate(${lerp(from.x, heroRect.x, p)}px, ${lerp(from.y, heroRect.y, p)}px)`;
+      const radius = Math.max(0, lerp(22 * s, 0, p));
+      ghost.style.borderRadius = `${radius}px ${radius}px 0 0`;
+    };
+    const close = () => {
+      detail.remove(); ghost.remove(); cover.style.visibility = '';
+      under.removeAttribute('style'); open = null;
+    };
+    entry.settle = (to, velocity = 0) => {
+      entry.anim?.stop(); hideReal();
+      entry.anim = spring({ from: entry.p, to, velocity, precision: 0.001, onUpdate: render, onDone: () => {
+        if (to === 1) { ghost.style.display = 'none'; hero.style.visibility = ''; detail.style.clipPath = ''; }
+        else close();
+      } });
+    };
+    let startX = null, tracker = null;
+    detail.addEventListener('pointerdown', e => {
+      if (e.target.closest('button') || e.clientX - stage.getBoundingClientRect().left > 28) return;
+      e.preventDefault();
+      startX = e.clientX; tracker = velocityTracker(); tracker.add(e.clientX, e.clientY);
+      entry.anim?.stop(); hideReal(); render(entry.p);
+      detail.setPointerCapture(e.pointerId);
+    });
+    detail.addEventListener('pointermove', e => {
+      if (startX === null) return;
+      tracker.add(e.clientX, e.clientY);
+      render(1 - clamp((e.clientX - startX) / (width * 0.9), 0, 1));
+    });
+    const release = () => {
+      if (startX === null) return;
+      startX = null;
+      const { vx } = tracker.get();
+      entry.settle(entry.p < 0.6 || vx > 500 ? 0 : 1, -vx / (width * 0.9));
+    };
+    detail.addEventListener('pointerup', release);
+    detail.addEventListener('pointercancel', release);
+    detail.querySelector('.icon-btn').onclick = () => entry.settle(0);
+    open = entry;
+    render(0);
+    entry.settle(1);
+  };
+  stage.querySelectorAll('.zoom-card').forEach(card => card.onclick = () => zoomOpen(card));
+})();
+
+(() => {
+  const stage = document.getElementById('fly'), screen = stage.querySelector('.fly-screen'), list = document.getElementById('fly-list');
+  const sheet = document.getElementById('fly-sheet'), scrim = document.getElementById('fly-scrim'), hero = document.getElementById('fly-hero'), title = document.getElementById('fly-title');
+  const items = [['Rain jacket', 'var(--cat-slate)', 'Packed'], ['Hiking boots', 'var(--cat-clay)', 'Packed'], ['Camera', 'var(--cat-lilac)', 'To buy']];
+  list.innerHTML = items.map(([name, color, state], i) => `<div class="row" style="padding:0 16px" data-item="${i}" tabindex="0" role="button"><span class="thumb" style="background:${color}"></span><span class="row-title">${name}</span><span class="row-trail">${state}</span></div>`).join('');
+  let state = null, closing = null;
+  const thumbRadius = 8, sheetRadius = 28;
+  const render = (p) => {
+    const height = sheet.offsetHeight, q = clamp(p, 0, 1.2);
+    sheet.style.transform = `translateY(${(1 - p) * (height + 40)}px)`;
+    scrim.style.opacity = String(clamp(p, 0, 1));
+    screen.style.transform = `translateY(${14 * q}px) scale(${1 - 0.08 * q})`;
+    screen.style.borderRadius = `${26 * clamp(q, 0, 1)}px`;
+    screen.style.filter = `brightness(${1 - 0.25 * clamp(q, 0, 1)})`;
+    if (state) state.p = p;
+  };
+  const openSheet = (row) => {
+    if (state || closing) return;
+    const [name, color] = items[+row.dataset.item], thumb = row.querySelector('.thumb');
+    title.textContent = name; hero.style.background = color;
+    sheet.hidden = false; scrim.classList.add('on');
+    state = { p: 0, anim: null, thumb, color, opener: row };
+    render(0);
+    state.anim = spring({ from: 0, to: 1, precision: 0.001, onUpdate: render });
+    hero.style.visibility = 'hidden'; thumb.style.visibility = 'hidden';
+    flyGhost(stage, color, relRect(thumb, stage), () => relRect(hero, stage), thumbRadius, sheetRadius, () => { hero.style.visibility = ''; });
+    document.getElementById('fly-close').focus({ preventScroll: true });
+  };
+  const closeSheet = (velocity = 0) => {
+    if (!state) return;
+    const st = state; st.anim?.stop(); state = null;
+    hero.style.visibility = 'hidden';
+    flyGhost(stage, st.color, relRect(hero, stage), () => relRect(st.thumb, stage), sheetRadius, thumbRadius, () => { st.thumb.style.visibility = ''; });
+    scrim.classList.remove('on');
+    closing = spring({ from: st.p, to: 0, velocity, precision: 0.001, onUpdate: render, onDone: () => {
+      closing = null; sheet.hidden = true; screen.removeAttribute('style'); hero.style.visibility = '';
+    } });
+    st.opener.focus({ preventScroll: true });
+  };
+  list.querySelectorAll('.row').forEach(row => {
+    row.onclick = () => openSheet(row);
+    row.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSheet(row); } };
+  });
+  document.getElementById('fly-close').onclick = () => closeSheet();
+  scrim.onclick = () => closeSheet();
+  sheet.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+  let startY = null, tracker = null, startP = 1, travel = 1, dragging = false;
+  sheet.addEventListener('pointerdown', e => {
+    if (!state || e.button !== 0 || e.target.closest('button')) return;
+    startY = e.clientY; tracker = velocityTracker(); tracker.add(0, e.clientY);
+    startP = state.p; travel = sheet.offsetHeight + 40; state.anim?.stop();
+    sheet.setPointerCapture(e.pointerId); dragging = true;
+  });
+  sheet.addEventListener('pointermove', e => {
+    if (!dragging || !state) return;
+    tracker.add(0, e.clientY);
+    const raw = e.clientY - startY, dy = raw >= 0 ? raw : -Math.sqrt(-raw) * 4;
+    render(startP - dy / travel);
+  });
+  const release = () => {
+    if (!dragging) return;
+    dragging = false;
+    if (!state) return;
+    const { vy } = tracker.get();
+    if ((1 - state.p > 1 / 3 && vy > -700) || vy > 700) closeSheet(-vy / travel);
+    else state.anim = spring({ from: state.p, to: 1, velocity: -vy / travel, precision: 0.001, onUpdate: render });
+  };
+  sheet.addEventListener('pointerup', release);
+  sheet.addEventListener('pointercancel', release);
+})();
+
+(() => {
+  const list = document.getElementById('armed-list');
+  const tasks = ['Water the plants', 'Call Mum', 'Renew passport', 'Return the jacket'];
+  list.innerHTML = tasks.map(name => `<div class="armed-row"><div class="armed-action"><span class="armed-text">Done</span><span class="armed-disc"><svg viewBox="0 0 12 12"><use href="#ck"/></svg></span></div><div class="armed-front row"><span class="check">${ck}</span><span class="row-title">${name}</span></div></div>`).join('');
+  const toggleDone = (wrap) => {
+    const done = !wrap.classList.contains('is-done');
+    wrap.classList.toggle('is-done', done);
+    const front = wrap.querySelector('.armed-front');
+    front.classList.toggle('done', done);
+    wrap.querySelector('.armed-text').textContent = done ? 'Undo' : 'Done';
+    front.querySelector('.check').animate([{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }], { duration: DEFAULT.dur, easing: DEFAULT.easing });
+  };
+  list.querySelectorAll('.armed-row').forEach(wrap => {
+    const front = wrap.querySelector('.armed-front');
+    let mode = null, startX = 0, startY = 0, dx = 0, pointer = null, tracker = null, settle = null, armed = false;
+    const setX = x => { dx = x; front.style.transform = x ? `translateX(${x}px)` : ''; };
+    front.addEventListener('pointerdown', e => {
+      if (e.button > 0) return;
+      startX = e.clientX - dx; startY = e.clientY; pointer = e.pointerId; tracker = velocityTracker(); tracker.add(e.clientX, e.clientY);
+      settle?.stop();
+      mode = dx ? 'swipe' : 'pending';
+      if (mode === 'swipe') front.setPointerCapture(pointer);
+    });
+    front.addEventListener('pointermove', e => {
+      if (e.pointerId !== pointer || !mode) return;
+      tracker.add(e.clientX, e.clientY);
+      const mx = e.clientX - startX, my = e.clientY - startY;
+      if (mode === 'pending') {
+        if (Math.abs(mx) > 8 && Math.abs(mx) > Math.abs(my) * 1.2) { mode = 'swipe'; front.setPointerCapture(pointer); }
+        else if (Math.abs(my) > 8) { mode = null; return; }
+        else return;
+      }
+      const width = wrap.offsetWidth, raw = Math.min(0, mx), limit = width * 0.62;
+      setX(raw < -limit ? -limit - Math.sqrt(-raw - limit) * 5 : raw);
+      const nowArmed = -dx > width * 0.38;
+      if (nowArmed !== armed) { armed = nowArmed; wrap.classList.toggle('armed', armed); if (armed) buzz(); }
+    });
+    const release = e => {
+      if (e.pointerId !== pointer) return;
+      const was = mode; mode = null;
+      if (was !== 'swipe') return;
+      const { vx } = tracker.get();
+      const commit = (armed && vx < 900) || vx < -900;
+      wrap.classList.remove('armed'); armed = false;
+      settle = spring({ from: dx, to: 0, velocity: vx, onUpdate: setX });
+      if (commit) setTimeout(() => toggleDone(wrap), 120);
+    };
+    front.addEventListener('pointerup', release);
+    front.addEventListener('pointercancel', release);
+  });
+})();
+
+(() => {
+  const scroller = document.getElementById('reorder-scroller'), list = document.getElementById('reorder-list'), status = document.getElementById('reorder-status');
+  const stops = ['Pick up keys', 'Bakery', 'Post office', 'Pharmacy', 'Library', 'Bike shop', 'Market', 'Home'];
+  list.innerHTML = stops.map(name => `<div class="reorder-row"><span class="row-title">${name}</span><button class="grip" aria-label="Reorder ${name}"><svg class="icon"><use href="#grip"/></svg></button></div>`).join('');
+  const rowsNow = () => [...list.children];
+  const announce = row => { status.textContent = `${row.querySelector('.row-title').textContent} moved to position ${rowsNow().indexOf(row) + 1} of ${stops.length}`; };
+  let drag = null;
+  const paintLifted = () => { drag.row.style.transform = `translateY(${drag.y}px) scale(${drag.scale})`; };
+  const applyDrag = () => {
+    const d = drag;
+    const dy = d.lastY - d.startY + (scroller.scrollTop - d.startScroll);
+    const minY = -d.from * d.h, maxY = (d.rows.length - 1 - d.from) * d.h;
+    d.y = dy < minY ? minY - Math.sqrt(minY - dy) * 3 : dy > maxY ? maxY + Math.sqrt(dy - maxY) * 3 : dy;
+    paintLifted();
+    const to = clamp(Math.round(d.from + d.y / d.h), 0, d.rows.length - 1);
+    if (to !== d.to) { d.to = to; buzz(); }
+    d.rows.forEach((r, i) => {
+      if (r === d.row) return;
+      let shift = 0;
+      if (d.from < d.to && i > d.from && i <= d.to) shift = -d.h;
+      if (d.from > d.to && i < d.from && i >= d.to) shift = d.h;
+      r.style.transform = shift ? `translateY(${shift}px)` : '';
+    });
+  };
+  const autoScroll = () => {
+    if (!drag) return;
+    const rect = scroller.getBoundingClientRect();
+    const edge = drag.lastY > rect.bottom - 90 ? 1 : drag.lastY < rect.top + 90 ? -1 : 0;
+    if (edge) { scroller.scrollTop += edge * 7; applyDrag(); }
+    drag.auto = requestAnimationFrame(autoScroll);
+  };
+  const startDrag = (row, e) => {
+    const rows = rowsNow(), from = rows.indexOf(row);
+    drag = { row, rows, from, to: from, h: row.offsetHeight, startY: e.clientY, lastY: e.clientY, startScroll: scroller.scrollTop, y: 0, scale: 1, tracker: velocityTracker(), lift: null, auto: 0 };
+    row.classList.add('lifted');
+    rows.forEach(r => { if (r !== row) r.classList.add('sliding'); });
+    drag.lift = spring({ from: 1, to: 1.035, precision: 0.0005, onUpdate: s => { if (drag) { drag.scale = s; paintLifted(); } } });
+    drag.auto = requestAnimationFrame(autoScroll);
+  };
+  const moveDrag = e => { if (!drag) return; drag.tracker.add(e.clientX, e.clientY); drag.lastY = e.clientY; applyDrag(); };
+  const endDrag = () => {
+    const d = drag; if (!d) return; drag = null;
+    cancelAnimationFrame(d.auto); d.lift?.stop();
+    const { vy } = d.tracker.get();
+    let y = d.y, s = d.scale;
+    const paint = () => { d.row.style.transform = `translateY(${y}px) scale(${s})`; };
+    spring({ from: y, to: (d.to - d.from) * d.h, velocity: vy, onUpdate: v => { y = v; paint(); }, onDone: () => {
+      d.rows.forEach(r => { r.classList.remove('sliding', 'lifted'); r.style.transform = ''; });
+      if (d.to !== d.from) {
+        const order = rowsNow().filter(r => r !== d.row);
+        order.splice(d.to, 0, d.row);
+        order.forEach(r => list.appendChild(r));
+        announce(d.row);
+      }
+    } });
+    spring({ from: s, to: 1, precision: 0.0005, onUpdate: v => { s = v; paint(); } });
+  };
+  const moveByKey = (row, step) => {
+    const neighbour = step < 0 ? row.previousElementSibling : row.nextElementSibling;
+    if (!neighbour) return;
+    const h = row.offsetHeight;
+    if (step < 0) list.insertBefore(neighbour, row.nextElementSibling); else list.insertBefore(neighbour, row);
+    [[row, -step * h], [neighbour, step * h]].forEach(([el, offset]) => {
+      const lifted = el === row ? ' scale(1.035)' : '';
+      spring({ from: offset, to: 0, onUpdate: v => { el.style.transform = `translateY(${v}px)${lifted}`; } });
+    });
+    buzz(); announce(row);
+  };
+  rowsNow().forEach(row => {
+    const grip = row.querySelector('.grip');
+    let pending = null, pressTimer = 0, keyboardFrom = -1;
+    row.addEventListener('pointerdown', e => {
+      if (e.button > 0 || drag) return;
+      if (e.target.closest('.grip')) { e.preventDefault(); row.setPointerCapture(e.pointerId); startDrag(row, e); return; }
+      pending = { x: e.clientX, y: e.clientY, id: e.pointerId };
+      pressTimer = setTimeout(() => { if (!pending) return; buzz(); try { row.setPointerCapture(pending.id); } catch {} startDrag(row, e); pending = null; }, 380);
+    });
+    row.addEventListener('pointermove', e => {
+      if (pending && Math.hypot(e.clientX - pending.x, e.clientY - pending.y) > 8) { clearTimeout(pressTimer); pending = null; }
+      if (drag && drag.row === row) moveDrag(e);
+    });
+    const release = () => { clearTimeout(pressTimer); pending = null; if (drag && drag.row === row) endDrag(); };
+    row.addEventListener('pointerup', release);
+    row.addEventListener('pointercancel', release);
+    row.addEventListener('touchmove', e => { if (drag && drag.row === row) e.preventDefault(); }, { passive: false });
+    row.addEventListener('contextmenu', e => e.preventDefault());
+    grip.addEventListener('keydown', e => {
+      const lifted = keyboardFrom >= 0;
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        if (lifted) { keyboardFrom = -1; row.classList.remove('lifted'); row.style.transform = ''; announce(row); }
+        else { keyboardFrom = rowsNow().indexOf(row); row.classList.add('lifted'); row.style.transform = 'scale(1.035)'; status.textContent = `${row.querySelector('.row-title').textContent} lifted. Use the arrow keys to move it.`; }
+      } else if (lifted && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+        e.preventDefault(); moveByKey(row, e.key === 'ArrowUp' ? -1 : 1);
+      } else if (lifted && e.key === 'Escape') {
+        e.preventDefault();
+        while (rowsNow().indexOf(row) !== keyboardFrom) moveByKey(row, rowsNow().indexOf(row) > keyboardFrom ? -1 : 1);
+        keyboardFrom = -1; row.classList.remove('lifted'); row.style.transform = '';
+      }
+    });
+    grip.addEventListener('blur', () => { if (keyboardFrom >= 0) { keyboardFrom = -1; row.classList.remove('lifted'); row.style.transform = ''; } });
+  });
+})();
+
+(() => {
+  const button = document.getElementById('morph'), label = document.getElementById('morph-label'), ring = document.getElementById('morph-ring');
+  const arc = document.getElementById('morph-arc'), done = document.getElementById('morph-done'), status = document.getElementById('morph-status');
+  let width = null, widthAnim = null;
+  const springWidth = (to, onDone) => {
+    widthAnim?.stop();
+    widthAnim = spring({ from: width ?? button.offsetWidth, to, onUpdate: w => { width = w; button.style.width = w + 'px'; }, onDone });
+  };
+  const finish = () => {
+    buzz();
+    ring.style.opacity = '0'; ring.classList.remove('popin');
+    done.style.opacity = '1'; done.classList.add('popin');
+    status.textContent = 'Published';
+    springWidth(120);
+    setTimeout(reset, 1100);
+  };
+  const reset = () => {
+    done.style.opacity = '0'; done.classList.remove('popin');
+    label.classList.remove('blur-out'); label.style.visibility = ''; label.classList.add('blur-in');
+    arc.style.strokeDashoffset = '75.4';
+    springWidth(button.parentElement.clientWidth, () => { width = null; button.style.width = ''; button.disabled = false; label.classList.remove('blur-in'); });
+  };
+  button.onclick = () => {
+    if (button.disabled) return;
+    button.disabled = true; status.textContent = 'Publishing';
+    width = button.offsetWidth;
+    label.classList.add('blur-out');
+    springWidth(button.offsetHeight);
+    setTimeout(() => {
+      label.style.visibility = 'hidden'; ring.style.opacity = '1'; ring.classList.add('popin');
+      const start = performance.now(), duration = 1300;
+      const fill = now => {
+        const p = Math.min(1, (now - start) / duration);
+        arc.style.strokeDashoffset = String(75.4 * Math.pow(1 - p, 3));
+        if (p < 1) requestAnimationFrame(fill); else finish();
+      };
+      requestAnimationFrame(fill);
+    }, 160);
+  };
 })();
 </script>
 </body>

@@ -32,6 +32,7 @@ Any scrolling area — a screen between its header and bottom bar, or a fixed-he
 - Divider between rows: 1px `line` as a `::before` on `row + row`, inset 16px from the left, flush right. Hide the dividers above and below a hovered row.
 - Hover: background `press` (web only). Pressed: background `line`. `--dur-fast` color transition.
 - Done / disabled row: title in `ink-3`.
+- **Row gestures:** swipe left reveals Delete (motion.md §6) or runs one action with a full swipe (Armed swipe, §11); long-press or the grip lifts the row to reorder (§12). Each also exists as a button or menu item. Opening a row with a thumbnail flies the photo into the sheet (§10).
 
 ## Check (circular)
 
@@ -97,7 +98,7 @@ Capsules. Three variants:
 
 ## Sheets & modals
 
-- **< 640px: bottom sheet.** Slides up with the spring, top corners `xl`, grabber, Push back behind it. **Always drag-to-dismiss** (motion.md §2): grab and pull down, it follows the finger and closes past ⅓ or on a flick.
+- **< 640px: bottom sheet.** Slides up with the spring, top corners `xl`, grabber, Push back behind it. **Always drag-to-dismiss** (motion.md §2): grab and pull down, it follows the finger and closes past ⅓ or on a flick faster than 700 px/s, carrying the flick's speed. Grabbing a sheet mid-animation stops it under the finger.
 - **≥ 640px: centered dialog**, never a bottom sheet (it looks broken on wide screens). Width `min(440px, 100% − 48px)`, all corners `xl`, enters with `scale(0.96) → 1` + fade + 4% rise on the spring.
 - Fill `bg` containing islands (or `surface` for a simple message). `shadow-float`. Scrim `--scrim` + `backdrop-filter: blur(6px)`.
 - Grabber 36×5, `track`, centered 12px from the top. Title headline, close via icon button. Scrim tap and Escape also close.
