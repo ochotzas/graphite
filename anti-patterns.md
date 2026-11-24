@@ -18,7 +18,7 @@ These are default habits that break Graphite or make UI look generic/AI-made.
 | Uppercase tracked eyebrow labels | Sentence-case caption in `ink-2` |
 | Small, timid screen titles | Big title1 (38/700, tight) left-aligned |
 | Several filled primary buttons | One ink primary per screen |
-| Loud status pills/badges (solid fills, white text) | Soft chip: `*-tint` fill, ink text, colored dot |
+| Loud status pills/badges (solid fills, white text) | Tag: `*-tint` capsule, text in the status color |
 | Green/blue success toasts | Ink toast capsule; banners use the soft tint |
 | 3-up grid of feature cards with emoji icons | A list island, or one strong statement |
 | Icons on titles, island labels and plain content rows | Icons in navigation, icon buttons, known actions, settings rows, menus, banners (`foundations.md` › Icons) |
