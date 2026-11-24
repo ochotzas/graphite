@@ -104,7 +104,9 @@ Tight tracking: `.tracking(-1.1)` on title1, `-1` on stat, `-0.5` on title2. Lar
 - Scroll-edge fade: iOS 26 `.scrollEdgeEffectStyle(.soft, for: .all)`; earlier iOS: `.mask` with a `LinearGradient` at the edges.
 - Sheets: `.sheet` + `.presentationDetents` on iPhone, `.presentationSizing(.form)` on iPad & Mac.
 
-**Motion.** `.spring(response: 0.25, dampingFraction: 0.88)` (= stiffness 620 / damping 44, see `motion.md`). Drags hand their release velocity to the spring: in `onEnded` use `.interpolatingSpring(mass: 1, stiffness: 620, damping: 44, initialVelocity:)`. Prefer native transitions that already do this: `.navigationTransition(.zoom(…))` for Zoom open and Photo fly-in, `.swipeActions(allowsFullSwipe: true)` for Armed swipe, `.onMove` for Lift to reorder. Honor `@Environment(\.accessibilityReduceMotion)`. Light `.sensoryFeedback(.impact(weight: .light), trigger:)` on check and primary button.
+**Motion.** `.spring(response: 0.25, dampingFraction: 0.88)` (= stiffness 620 / damping 44, see `motion.md`). Drags hand their release velocity to the spring: in `onEnded` use `.interpolatingSpring(mass: 1, stiffness: 620, damping: 44, initialVelocity:)`. Prefer native transitions that already do this: `.navigationTransition(.zoom(…))` for Zoom open and Photo fly-in, `.swipeActions(allowsFullSwipe: true)` for Armed swipe, `.onMove` for Lift to reorder, `NavigationStack` for Push and pop. Honor `@Environment(\.accessibilityReduceMotion)`. Light `.sensoryFeedback(.impact(weight: .light), trigger:)` on check and primary button.
+
+**Chips and tags.** Filter chip: `Button` + `.buttonStyle(.bordered)` + `.buttonBorderShape(.capsule)`, selected `.borderedProminent`, both `.tint(ink)`. Tag: `Text` in `.caption.weight(.semibold)`, `.foregroundStyle(text color)`, `.padding(.horizontal, 8).frame(height: 22).background(tint, in: .capsule)`.
 
 ## Other (emails, slides, docs)
 Same palette and Figtree, grey `bg` with light islands, one ink button. Slides: title1/display sizes, one idea per slide.

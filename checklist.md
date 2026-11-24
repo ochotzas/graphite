@@ -4,7 +4,7 @@ Run before saying UI work is finished. Check against the actual code/screens, fi
 
 ## Graphite identity
 - [ ] Only graphite + soft color tokens; every color means something (status, link, focus, now, category)
-- [ ] Text on tints is `ink`; buttons and selected states are ink, never colored
+- [ ] Text on tints is `ink`, except tags (colored text from `cat-*-text` or the status color); buttons, filter chips and selected states are ink, never colored
 - [ ] Screen stays mostly grey; color only on small things (icons, dots, chips, one chart)
 - [ ] Exactly one ink-filled primary button per screen
 - [ ] Content grouped in `surface` islands on the `bg` table; no nested islands; no island shadows/borders
@@ -36,12 +36,13 @@ Run before saying UI work is finished. Check against the actual code/screens, fi
 ## Quality
 - [ ] Dark mode checked
 - [ ] 360px wide works, no horizontal scroll; touch targets ≥ 44px
-- [ ] Visible keyboard focus; essential text uses `ink` / `ink-2` only
+- [ ] Visible keyboard focus; essential text uses `ink` / `ink-2` only (tags excepted, at ≥ 4.5:1)
 - [ ] Motion only on state change; reduced motion respected
 - [ ] Drags hand their release velocity to the spring; moving things can be grabbed mid-flight; flicks commit (`motion.md` › Physics and gestures)
 - [ ] Every gesture action (swipe, reorder, edge-back) also has a button, menu or keyboard way
 - [ ] Dialogs and sheets: focus moves in, stays in, Escape closes, focus returns; background inert; close button present
 - [ ] Reduced transparency drops blurs; increased contrast works (`foundations.md` › Accessibility)
+- [ ] Going deeper pushes, going back pops, switching tabs never slides (`motion.md` §14); the leaving page is inert
 - [ ] Native: haptics only at the moments in `motion.md` › Haptics
 
 ## No slop (`unslop.md`)

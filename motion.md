@@ -9,7 +9,7 @@ Working reference for every effect below: **`examples/motion.html`** — copy fr
 - Animate only `transform`, `opacity`, `filter`. Animate layout (height) only for list insert/remove.
 - **Interruptible:** a new tap/gesture retargets from the current position and velocity (see Physics and gestures).
 - **Reduced motion:** replace movement with an opacity crossfade (`--dur-base`); keep the blur off; no shake (show the error only).
-- Never: page-load stagger, hover lift, looping decoration, parallax.
+- Never: page-load stagger, hover lift, looping decoration, parallax. The only loops are waiting indicators (spinner, sweep, skeleton), and only while something is actually loading.
 
 ## Physics and gestures
 
@@ -36,6 +36,9 @@ The CSS curve covers taps and state changes. Anything a finger drags runs on rea
 | **Scroll edges** | Content fades + blurs into the top/bottom edge of every scroll area (components.md › Scroll-edge fade). Edges appear/disappear with `--dur-base`. |
 | **Hover (web)** | Whole row/item fills with `press` in `--dur-fast`. No lift, no scale. |
 | **List insert/remove** | Height + opacity, spring; neighbors follow. |
+| **New row in place** | A row the user just added (inline add, undo restore) arrives with Blur swap's in: opacity 0→1, `blur(8px→0)`, from `translateY(6px) scale(0.98)`, spring. A small marker on it (changed dot, "New") pops in: `scale(0.5) → 1` + fade, spring. Other new content (a pane, a banner, a result) rises 8–12px + fades on the spring. |
+| **Menu / popover** | Opens from its trigger: `translateY(-6px) scale(0.96) → none` + fade, spring, transform-origin at the trigger's edge (top for a menu below the trigger). Closes with a `--dur-base` fade. Reduced motion: fade only. |
+| **Waiting** | Spinner: one turning arc, 900ms linear per turn. Unknown progress in a bar: an `ink` capsule 40% wide sweeps left → right in 1.4s `--ease-out`, on a `track` bar. Skeleton: opacity 1 → 0.6, 1.2s ease-in-out, alternating. Reduced motion: spinner turns at 2400ms, the sweep becomes a still full bar at 60% opacity, skeletons stay still. |
 
 ## Haptics (native)
 
@@ -113,13 +116,14 @@ Segmented controls and tab pills: the selection indicator stretches as it travel
 - Native: SwiftUI `matchedGeometryEffect` with two springs, or Reanimated with separate shared values per edge.
 
 ### 9 · Zoom open
-A card opens into its screen: the card grows to fill the screen and its image flies up to become the header.
-- The new screen is clipped to the card's rect (`clip-path: inset(… round 22px)`) and the clip opens to the full screen on the spring; radius 22 → 0. Its content fades in over the first third.
-- The card's image is a ghost that moves and resizes from the card cover to the header image; both real images hide while it flies.
-- The screen behind scales to 0.94 (origin top center), `brightness(0.82)`, radius 30.
-- Back: the back button, or drag from the left edge (first 28px). Progress follows the finger (`1 − dx ÷ 90% of width`) and the card shrinks back into its place in the list. Release closes when under 60% progress or faster than 500 px/s to the right, with the release velocity; otherwise it reopens.
-- Reduced motion: crossfade the screens (`--dur-base`), no ghost.
-- Native: iOS 18+ `.navigationTransition(.zoom(sourceID:in:))` with `.matchedTransitionSource` on the card — it does the edge-swipe for free. Web/RN: implement as above.
+A card opens into its screen the way iOS does it: the card itself grows into the page.
+- The new screen starts as a scaled-down copy sitting exactly on the card: uniform scale = card width ÷ screen width, clipped to the card's height (`clip-path: inset(0 0 … round …)`, radius 22 → 0), its fill see-through at first and solid `bg` by 20% of the way, so the card's own label stays in place and disappears under the growing page instead of vanishing on tap. Its frame grows to the full screen on the spring. Move it with `transform` only; never animate `width`/`height`.
+- Its header image starts at the height of the card's image (clipped from below) and grows to its full height, with the content riding just under it.
+- No copy of the card on top and no crossfade between the two titles: the screen's text and controls fade in from 25% to 55% of the way, already at their own size.
+- The screen behind stays still; it only dims slightly (black at 12%).
+- Back: the back button, or drag from the left edge (first 28px). Progress follows the finger (`1 − dx ÷ 90% of width`) and the screen shrinks back into the card. Release closes when under 60% progress or faster than 500 px/s to the right, with the release velocity; otherwise it reopens.
+- Reduced motion: crossfade the screens (`--dur-base`), no scaling.
+- Native: iOS 18+ `.navigationTransition(.zoom(sourceID:in:))` with `.matchedTransitionSource` on the card — it does all of this and the edge swipe for free. Web/RN: implement as above.
 
 ### 10 · Photo fly-in
 Opening an item from a list with a thumbnail: the thumbnail flies into the sheet's header image, and back on close.
@@ -146,8 +150,9 @@ Rows in a list can be picked up and moved.
 - Lifted: `scale(1.035)` on the spring, `shadow-float`, `surface` fill, radius `md`, above its neighbours. Dividers next to it hide.
 - The row follows the finger 1:1. Each time it passes half a row, the neighbours slide one row up or down on the spring and a selection haptic plays. Past the first or last slot it rubber-bands (√, f = 3).
 - Near the top or bottom 90px of the scroll area the list auto-scrolls (~7px a frame) and the row stays under the finger.
-- Drop: the row springs into its slot with the release velocity while the scale springs back to 1; then the order is saved (toast with Undo when it matters).
+- Drop: the row springs into its slot with the release velocity while the scale springs back to 1; the list order changes only once both have settled (or at once when another row is grabbed), then the order is saved (toast with Undo when it matters).
 - Keyboard: the grip is a button. Space or Enter lifts, ↑↓ move one slot, Space or Enter drops, Escape puts it back. Announce "Moved to position 3 of 6" in a live region.
+- After a move by keyboard or by a Move up/down menu item, and after every drop with reduced motion, the moved row shows a `press` fill that fades out over 700ms `--ease-out`, so the eye finds where it landed.
 - Reduced motion: no lift scale; neighbours and drop jump into place.
 - Native: SwiftUI `List` + `.onMove` (or `.draggable` / `.dropDestination`); RN: a reorderable list on Reanimated with the same lift.
 
@@ -160,3 +165,15 @@ A primary capsule that starts a job (publish, send, upload) turns into its own p
 - The button is disabled while it works; `role="status"` announces the result.
 - Reduced motion: no width change; the label crossfades "Publish" → "Publishing…" → "Published".
 - Native: SwiftUI one `Button` whose label switches between `Text`, `ProgressView` and `Image(systemName: "checkmark")` inside `withAnimation(.spring(…))`, frame width animated.
+
+### 14 · Push and pop
+Moving deeper into the app and back (list → detail → sub-page) slides like an iOS navigation stack.
+- Decide the motion from the path, before the page changes. Same first segment and the new path extends the old one → **push**. The old path extends the new one → **pop**. Different first segment → **tab** (use Tab change, never a slide). Anything else, and history jumps (Back/Forward buttons, which can skip levels) → **swap**.
+- Push (phones, and any width where pages replace each other): the new page slides in from the right, `translateX(100%) → 0`, on the spring, above the old one with a `bg` fill. The old page moves to `translateX(-28%)` and fades to 70% opacity underneath, on the same spring.
+- Pop: the reverse. The leaving page slides out to the right over the page below, which comes back from `-28%` and 70%.
+- Swap: the new page rises `translateY(8px) → 0` and fades in on the spring; the old page leaves at once.
+- Wide screens with a list next to the detail: no slide. The detail pane's content swaps (rise + fade); the list stays put.
+- The leaving page is `inert` (no taps, no focus) and keeps its scroll position while it moves (pin it at `top: -scrollY`). Focus moves to the new page's title.
+- Back: the back button, or drag from the left edge (first 28px). The page follows the finger and the page below comes forward by the same progress (`dx ÷ width`). Release goes back past 40% of the width or on a flick faster than 500 px/s to the right, with the release velocity; otherwise it springs back.
+- Reduced motion: every navigation is a `--dur-base` crossfade.
+- Native: SwiftUI `NavigationStack` and Expo Router's native `Stack` do push, pop and the edge swipe already — never rebuild them. Web: implement as above (SvelteKit `onNavigate`, React Router `useNavigationType`, or the View Transitions API with the same values).

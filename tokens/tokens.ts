@@ -34,6 +34,12 @@ export const palette = {
     catRoseTint: '#FADBE1',
     catLilac: '#967BB5',
     catLilacTint: '#EADFF8',
+    catSlateText: '#2C67A3',
+    catSageText: '#3C7147',
+    catSandText: '#7A6025',
+    catClayText: '#985030',
+    catRoseText: '#A44359',
+    catLilacText: '#7951A7',
   },
   dark: {
     bg: '#0F0F11',
@@ -66,6 +72,12 @@ export const palette = {
     catRoseTint: '#3C2329',
     catLilac: '#AA92C7',
     catLilacTint: '#30263B',
+    catSlateText: '#78A3CF',
+    catSageText: '#7AAD84',
+    catSandText: '#B59B63',
+    catClayText: '#C98F75',
+    catRoseText: '#CA8A98',
+    catLilacText: '#AA92C7',
   },
 } as const;
 

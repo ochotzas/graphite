@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graphite Selectors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<style>
+  .title1 { font-size: var(--text-title1); line-height: var(--lh-title1); letter-spacing: var(--track-title1); font-weight: 700; margin: 0; }
+  .headline { font-size: var(--text-headline); line-height: var(--lh-headline); font-weight: 600; margin: 0; }
+  .footnote { font-size: var(--text-footnote); line-height: var(--lh-footnote); font-weight: 500; color: var(--ink-2); margin: 0; }
+  .caption { font-size: var(--text-caption); line-height: var(--lh-caption); font-weight: 500; color: var(--ink-2); margin: 0; }
+  .lead { color: var(--ink-2); margin: var(--space-2) 0 0; max-width: 62ch; }
+  .icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  .page { max-width: var(--width-app); margin: 0 auto; padding: var(--space-8) var(--gutter) var(--space-9); }
+  .demos { display: grid; gap: var(--space-7) var(--space-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); align-items: start; margin-top: var(--space-7); }
+  .demo-stack { display: flex; flex-direction: column; gap: var(--space-7); min-width: 0; }
+  .demo .group-label { margin: 0 0 var(--space-2) var(--space-1); }
+  .demo .note { margin: var(--space-2) var(--space-1) 0; max-width: 62ch; }
+  .island { background: var(--surface); border-radius: var(--radius-lg); }
+  .island-pad { padding: var(--space-5); }
+  .island-list { overflow: hidden; }
+
+  .field { display: flex; flex-direction: column; gap: var(--space-2); }
+  .field > label, .field > .label { font-size: var(--text-footnote); font-weight: 500; color: var(--ink-2); margin-left: var(--space-1); }
+  .help { font-size: var(--text-footnote); line-height: var(--lh-footnote); font-weight: 500; color: var(--ink-2); margin-left: var(--space-1); }
+
+  /* ---------- Popover panel shared by every selector ---------- */
+  .anchor { position: relative; }
+  .pop { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 30; padding: 6px; background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-float);
+    transform-origin: top center; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .pop.up { top: auto; bottom: calc(100% + 6px); transform-origin: bottom center; }
+  .pop[hidden] { display: none; }
+  .option { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 10px; border-radius: var(--radius-sm); color: var(--ink); font: 400 16px var(--font); cursor: pointer; user-select: none;
+    transition: background var(--dur-fast) var(--ease-out); }
+  .option.two { min-height: 52px; padding-block: 6px; }
+  .option:hover, .option.active { background: var(--press); }
+  .option .text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .option .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .option .sub { font-size: var(--text-footnote); line-height: var(--lh-footnote); font-weight: 500; color: var(--ink-2); }
+  .option mark { background: none; color: inherit; font-weight: 600; }
+  .tick { width: 14px; height: 14px; flex: none; fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
+  .option[aria-selected="true"] .tick, [aria-checked="true"] > .tick { visibility: visible; }
+  .no-match { padding: 10px; font-size: var(--text-footnote); line-height: var(--lh-footnote); font-weight: 500; color: var(--ink-2); }
+  .avatar { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; flex: none; background: var(--tint); color: var(--text); font: 600 12px/1 var(--font); }
+
+  /* ---------- Combobox field (searchable and multi) ---------- */
+  .combo-field { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 6px 0 16px; border-radius: var(--radius-md); background: var(--bg); cursor: text;
+    transition: box-shadow var(--dur-fast) var(--ease-out); }
+  .combo-field:focus-within { box-shadow: 0 0 0 2px var(--accent); }
+  .combo-field .avatar { margin-left: -6px; }
+  .combo-input { flex: 1; min-width: 0; height: 40px; border: 0; padding: 0; background: none; color: var(--ink); font: 400 16px var(--font); outline: none; }
+  .combo-input::placeholder { color: var(--ink-3); }
+  .combo-toggle { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border: 0; border-radius: 50%; background: none; color: var(--ink-3); cursor: pointer;
+    transition: transform var(--dur-spring) var(--spring), color var(--dur-fast) var(--ease-out); }
+  .combo-toggle:hover { color: var(--ink-2); }
+  [aria-expanded="true"] ~ .combo-toggle { transform: rotate(180deg); }
+  .multi-field { position: relative; flex-wrap: wrap; gap: 6px; padding: 8px 48px 8px 8px; }
+  .multi-field .combo-toggle { position: absolute; right: 6px; top: 6px; }
+  .multi-field .combo-input { flex: 1 1 64px; min-width: 64px; padding-left: 8px; }
+  .token { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 4px 0 10px; border-radius: var(--radius-full); background: var(--surface); color: var(--ink); font: 600 13px/1 var(--font); white-space: nowrap; }
+  .token .remove { position: relative; display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%; background: none; color: inherit; cursor: pointer; }
+  .token .remove::after { content: ""; position: absolute; inset: -12px; }
+  .token .remove svg { width: 16px; height: 16px; opacity: 0.55; transition: opacity var(--dur-fast) var(--ease-out); }
+  .token .remove:hover svg { opacity: 0.85; }
+  .token.arrive { animation: token-in var(--dur-spring) var(--spring); }
+  @keyframes token-in { from { opacity: 0; transform: scale(0.6); } }
+
+  /* ---------- Pop-up button and rich menu ---------- */
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
+  .popup-btn { display: inline-flex; align-items: center; gap: 4px; height: 36px; padding: 0 8px 0 14px; border: 0; border-radius: var(--radius-full); background: var(--track); color: var(--ink);
+    font: 500 15px var(--font); white-space: nowrap; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    transition: background var(--dur-fast) var(--ease-out), transform var(--dur-spring) var(--spring); }
+  .popup-btn { position: relative; }
+  .popup-btn::after { content: ""; position: absolute; inset: -4px 0; }
+  .popup-btn:hover { background: color-mix(in srgb, var(--track), var(--ink) 7%); }
+  .popup-btn:active { transform: scale(var(--press-scale)); transition-duration: var(--dur-fast), 90ms; }
+  .popup-btn .icon { width: 16px; height: 16px; color: var(--ink-2); }
+  .menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 30; width: 264px; max-width: calc(100vw - 2 * var(--gutter)); padding: 6px; background: var(--surface); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-float); transform-origin: top right; }
+  .menu[hidden] { display: none; }
+  .menu.up { top: auto; bottom: calc(100% + 6px); transform-origin: bottom right; }
+  .menu-label { padding: 8px 10px 4px; font-size: var(--text-caption); line-height: var(--lh-caption); font-weight: 600; color: var(--ink-2); }
+  .menu-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 0 10px; border: 0; border-radius: var(--radius-sm); background: none; color: var(--ink);
+    font: 400 16px var(--font); text-align: left; cursor: pointer; outline: none; transition: background var(--dur-fast) var(--ease-out); }
+  .menu-item.two { min-height: 52px; padding-block: 6px; }
+  .menu-item .icon { color: var(--ink-2); }
+  .menu-item .text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .menu-item .sub { font-size: var(--text-footnote); line-height: var(--lh-footnote); font-weight: 500; color: var(--ink-2); }
+  .menu-item .value { color: var(--ink-2); font-size: 15px; }
+  .menu-item .more { width: 16px; height: 16px; color: var(--ink-3); }
+  .menu-item:hover, .menu-item:focus-visible, .menu-item[aria-expanded="true"] { background: var(--press); }
+  .menu-sep { height: 1px; margin: 6px 4px; background: var(--line); }
+  .submenu { position: absolute; z-index: 31; width: 220px; padding: 6px; background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-float); transform-origin: top left; }
+  .submenu[hidden] { display: none; }
+  .submenu.left { transform-origin: top right; }
+  .submenu.over { transform-origin: top center; }
+  .menu-back { display: none; font-weight: 600; }
+  .submenu.over .menu-back { display: flex; }
+  .submenu.over .menu-back + .menu-item { box-shadow: 0 -7px 0 -6px var(--line); margin-top: 7px; }
+  .dish-row { display: flex; align-items: center; gap: var(--space-3); min-height: 52px; padding: 0 var(--space-4); }
+  .dish-row + .dish-row, .group-head + .dish-row { box-shadow: inset 0 1px 0 var(--line); }
+  .dish-row .name { flex: 1; font-weight: 500; }
+  .dish-row .price { font-size: var(--text-footnote); font-weight: 500; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .dish-row.sold .name { color: var(--ink-3); }
+  .group-head { padding: var(--space-3) var(--space-4) var(--space-1); font-size: var(--text-caption); line-height: var(--lh-caption); font-weight: 600; color: var(--ink-2); }
+  .tag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: var(--radius-full); background: var(--track); color: var(--ink); font: 600 12px/1 var(--font); letter-spacing: 0.01em; }
+
+  /* ---------- Time picker ---------- */
+  .select { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); width: 100%; height: 52px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md);
+    background: var(--bg); color: var(--ink); font: 400 16px var(--font); font-variant-numeric: tabular-nums; cursor: pointer; outline: none; transition: box-shadow var(--dur-fast) var(--ease-out); }
+  .select:focus-visible, .select[aria-expanded="true"] { box-shadow: 0 0 0 2px var(--accent); }
+  .select .icon { color: var(--ink-3); }
+  .times { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+  .time-pop { right: auto; width: 232px; padding: 10px; overflow: visible; max-height: none; }
+  .wheels { position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+  .wheels::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 40px; margin-top: -20px; border-radius: var(--radius-sm); background: var(--press); pointer-events: none; }
+  .wheel-colon { position: relative; font: 600 20px var(--font); color: var(--ink); padding-bottom: 2px; }
+  .wheel { position: relative; height: 200px; overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; padding: 80px 0; outline: none; border-radius: var(--radius-sm);
+    -webkit-mask-image: linear-gradient(transparent, #000 32%, #000 68%, transparent); mask-image: linear-gradient(transparent, #000 32%, #000 68%, transparent); }
+  .wheel::-webkit-scrollbar { display: none; }
+  .wheel:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+  .wheel-item { height: 40px; display: grid; place-items: center; scroll-snap-align: center; font: 400 20px var(--font); font-variant-numeric: tabular-nums; color: var(--ink-2); cursor: pointer; user-select: none;
+    transition: color var(--dur-fast) var(--ease-out); }
+  .wheel-item[aria-selected="true"] { color: var(--ink); font-weight: 600; }
+  .time-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding: 8px 4px 0; box-shadow: inset 0 1px 0 var(--line); }
+  .plain { height: 32px; padding: 0 12px; margin-right: -8px; border: 0; border-radius: var(--radius-full); background: none; color: var(--accent); font: 600 15px var(--font); cursor: pointer; }
+  .plain:hover { background: var(--press); }
+
+  /* ---------- Option list ---------- */
+  .choice { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 64px; padding: var(--space-3) var(--space-4); border: 0; background: none; color: var(--ink); text-align: left;
+    font: inherit; cursor: pointer; outline: none; transition: background var(--dur-fast) var(--ease-out); }
+  .choice + .choice { box-shadow: inset 0 1px 0 var(--line); }
+  .choice:hover { background: var(--press); }
+  .choice:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+  .choice .text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .choice .name { font-weight: 500; }
+  .choice .sub { font-size: var(--text-footnote); line-height: var(--lh-footnote); font-weight: 500; color: var(--ink-2); }
+  .radio { display: grid; place-items: center; width: 22px; height: 22px; flex: none; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--ring); color: var(--on-ink);
+    transition: background var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out); }
+  .radio svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+  .choice[aria-checked="true"] .radio { background: var(--ink); box-shadow: none; }
+  .choice[aria-checked="true"] .radio svg { opacity: 1; animation: check-pop var(--dur-spring) var(--spring); }
+  @keyframes check-pop { from { transform: scale(0.6); } }
+
+  .theme-btn { position: fixed; right: var(--gutter); bottom: var(--gutter); z-index: 10; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%;
+    background: var(--surface); color: var(--ink); box-shadow: var(--shadow-float); cursor: pointer; }
+
+  @media (prefers-reduced-motion: reduce) { .token.arrive, .choice[aria-checked="true"] .radio svg { animation: none; } .combo-toggle { transition: none; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="chev-down" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol>
+  <symbol id="chev-left" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+  <symbol id="updown" viewBox="0 0 24 24"><path d="M8 9.5l4-4 4 4M8 14.5l4 4 4-4"/></symbol>
+  <symbol id="check" viewBox="0 0 12 12"><path d="M2.5 6.3l2.3 2.2L9.5 3.5"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="az" viewBox="0 0 24 24"><path d="M4 18l4-12 4 12M5.5 14h5M14 7h6l-6 10h6"/></symbol>
+  <symbol id="euro" viewBox="0 0 24 24"><path d="M17.5 6.5A7 7 0 1 0 17.5 17.5M4.5 10.5h9M4.5 13.5h9"/></symbol>
+  <symbol id="flame" viewBox="0 0 24 24"><path d="M12 21c3.6 0 6-2.5 6-6 0-4-3-6-4-10-2 2-3 3.5-3 6-1-1-1.6-2-1.8-3C7.5 9.5 6 11.8 6 15c0 3.5 2.4 6 6 6z"/></symbol>
+  <symbol id="layers" viewBox="0 0 24 24"><path d="M12 4l8.5 4.5L12 13 3.5 8.5z"/><path d="M3.5 12.5L12 17l8.5-4.5"/></symbol>
+  <symbol id="eye" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.75"/></symbol>
+  <symbol id="x-fill" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="M8.8 8.8l6.4 6.4M15.2 8.8l-6.4 6.4" style="stroke: var(--surface)" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/></symbol>
+</svg>
+
+<main class="page">
+  <h1 class="title1">Selectors</h1>
+  <p class="lead">Dropdowns and pickers for choosing one thing, several things or a time. Every panel opens from its control on the spring and works fully from the keyboard. Specs in <code>components.md</code> › Inputs.</p>
+
+  <div class="demos">
+    <section class="demo">
+      <p class="caption group-label">Searchable select</p>
+      <div class="island island-pad">
+        <div class="field">
+          <label id="assign-label" for="assign-input">Assign to</label>
+          <div class="anchor">
+            <div class="combo-field" id="assign-field">
+              <span class="avatar" id="assign-avatar" hidden></span>
+              <input class="combo-input" id="assign-input" role="combobox" aria-expanded="false" aria-controls="assign-list" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Search people">
+              <button class="combo-toggle" type="button" tabindex="-1" aria-label="Show all people"><svg class="icon"><use href="#chev-down"/></svg></button>
+            </div>
+            <div class="pop" id="assign-pop" hidden><div role="listbox" id="assign-list" aria-labelledby="assign-label"></div></div>
+          </div>
+          <span class="help">Type a name or a role.</span>
+        </div>
+      </div>
+      <p class="footnote note">For long lists (more than ~8 items). Matches are bold; ↑↓ move, Enter picks, Escape restores the last choice.</p>
+    </section>
+
+    <section class="demo">
+      <p class="caption group-label">Multi-select</p>
+      <div class="island island-pad">
+        <div class="field">
+          <label id="allergen-label" for="allergen-input">Allergens</label>
+          <div class="anchor">
+            <div class="combo-field multi-field" id="allergen-field">
+              <input class="combo-input" id="allergen-input" role="combobox" aria-expanded="false" aria-controls="allergen-list" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Add allergens">
+              <button class="combo-toggle" type="button" tabindex="-1" aria-label="Show all allergens"><svg class="icon"><use href="#chev-down"/></svg></button>
+            </div>
+            <div class="pop" id="allergen-pop" hidden><div role="listbox" id="allergen-list" aria-labelledby="allergen-label" aria-multiselectable="true"></div></div>
+          </div>
+          <span class="help">Shown on the dish and the printed menu.</span>
+        </div>
+        <p class="sr-only" aria-live="polite" id="allergen-status"></p>
+      </div>
+      <p class="footnote note">The list stays open while picking. Backspace in an empty field removes the last tag.</p>
+    </section>
+
+    <section class="demo">
+      <p class="caption group-label">Pop-up button and rich menu</p>
+      <div class="island">
+        <div class="bar" style="padding:var(--space-4) var(--space-4) 0">
+          <p class="headline">Lunch</p>
+          <div class="anchor">
+            <button class="popup-btn" id="sort-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="sort-menu"><span id="sort-value">Newest</span><svg class="icon"><use href="#updown"/></svg></button>
+            <div class="menu" id="sort-menu" role="menu" aria-label="View options" hidden>
+              <div class="menu-label" aria-hidden="true">Sort by</div>
+              <div role="group" aria-label="Sort by">
+                <button class="menu-item" role="menuitemradio" aria-checked="true" data-sort="newest" tabindex="-1"><svg class="icon"><use href="#clock"/></svg><span class="text">Newest</span><svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+                <button class="menu-item two" role="menuitemradio" aria-checked="false" data-sort="name" tabindex="-1"><svg class="icon"><use href="#az"/></svg><span class="text">Name<span class="sub">A to Z</span></span><svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+                <button class="menu-item two" role="menuitemradio" aria-checked="false" data-sort="price" tabindex="-1"><svg class="icon"><use href="#euro"/></svg><span class="text">Price<span class="sub">Low to high</span></span><svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+                <button class="menu-item two" role="menuitemradio" aria-checked="false" data-sort="popular" tabindex="-1"><svg class="icon"><use href="#flame"/></svg><span class="text">Popularity<span class="sub">Most ordered this week</span></span><svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+              </div>
+              <div class="menu-sep" role="separator"></div>
+              <button class="menu-item" role="menuitem" aria-haspopup="menu" aria-expanded="false" aria-controls="group-menu" id="group-item" tabindex="-1"><svg class="icon"><use href="#layers"/></svg><span class="text">Group by</span><span class="value" id="group-value">None</span><svg class="icon more"><use href="#chev"/></svg></button>
+              <div class="menu-sep" role="separator"></div>
+              <button class="menu-item" role="menuitemcheckbox" aria-checked="true" id="show-sold" tabindex="-1"><svg class="icon"><use href="#eye"/></svg><span class="text">Show sold out</span><svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+            </div>
+            <div class="submenu" id="group-menu" role="menu" aria-label="Group by" hidden>
+              <button class="menu-item menu-back" role="menuitem" tabindex="-1"><svg class="icon"><use href="#chev-left"/></svg><span class="text">Group by</span></button>
+              <button class="menu-item" role="menuitemradio" aria-checked="true" data-group="none" tabindex="-1"><span class="text">None</span><svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+              <button class="menu-item" role="menuitemradio" aria-checked="false" data-group="course" tabindex="-1"><span class="text">Course</span><svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+              <button class="menu-item" role="menuitemradio" aria-checked="false" data-group="diet" tabindex="-1"><span class="text">Diet</span><svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div id="dish-list"></div>
+      </div>
+      <p class="footnote note">A pop-up button shows the current choice and up-down chevrons. The menu has sections, subtitles, a submenu (→ opens, ← closes) and a toggle item.</p>
+    </section>
+
+    <div class="demo-stack">
+    <section class="demo">
+      <p class="caption group-label">Time picker</p>
+      <div class="island island-pad">
+        <div class="times">
+          <div class="field">
+            <span class="label" id="open-label">Opens</span>
+            <div class="anchor time-anchor" data-time="11:30"></div>
+          </div>
+          <div class="field">
+            <span class="label" id="close-label">Closes</span>
+            <div class="anchor time-anchor" data-time="23:00"></div>
+          </div>
+        </div>
+      </div>
+      <p class="footnote note">Two snapping wheels, 5-minute steps. Scroll, tap a value, or focus a wheel and use ↑↓. Enter or Done closes.</p>
+    </section>
+
+    <section class="demo">
+      <p class="caption group-label">Option list</p>
+      <div class="island island-list" role="radiogroup" aria-label="How guests order" id="order-choice">
+        <button class="choice" role="radio" aria-checked="true" tabindex="0"><span class="text"><span class="name">At the table</span><span class="sub">Guests scan the QR code and order from their phone.</span></span><span class="radio"><svg viewBox="0 0 12 12"><use href="#check"/></svg></span></button>
+        <button class="choice" role="radio" aria-checked="false" tabindex="-1"><span class="text"><span class="name">At the counter</span><span class="sub">Guests order and pay at the till; the menu is for browsing.</span></span><span class="radio"><svg viewBox="0 0 12 12"><use href="#check"/></svg></span></button>
+        <button class="choice" role="radio" aria-checked="false" tabindex="-1"><span class="text"><span class="name">Menu only</span><span class="sub">No ordering. The menu shows dishes and prices.</span></span><span class="radio"><svg viewBox="0 0 12 12"><use href="#check"/></svg></span></button>
+      </div>
+      <p class="footnote note">For 2–6 choices that need a sentence each. Every option is visible at once; arrows move and pick.</p>
+    </section>
+    </div>
+  </div>
+</main>
+
+<button class="theme-btn" id="theme" aria-label="Toggle dark mode"><svg class="icon"><use href="#moon"/></svg></button>
+
+<script>
+const css = getComputedStyle(document.documentElement);
+const SPRING = { duration: parseFloat(css.getPropertyValue('--dur-spring')), easing: css.getPropertyValue('--spring').trim() };
+const EASE_IN = css.getPropertyValue('--ease-in').trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const CATS = ['slate', 'sage', 'sand', 'clay', 'rose', 'lilac'];
+const fold = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const escapeHtml = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const highlight = (text, query) => {
+  if (!query) return escapeHtml(text);
+  const at = fold(text).indexOf(fold(query));
+  if (at < 0) return escapeHtml(text);
+  return escapeHtml(text.slice(0, at)) + '<mark>' + escapeHtml(text.slice(at, at + query.length)) + '</mark>' + escapeHtml(text.slice(at + query.length));
+};
+
+let openPanel = null;
+function showPanel(panel, onClose) {
+  if (openPanel && openPanel.panel !== panel) openPanel.close();
+  if (!panel.hidden) return;
+  panel.hidden = false;
+  panel.classList.remove('up');
+  panel.style.translate = '';
+  const rect = panel.getBoundingClientRect();
+  const overflowRight = rect.right - (innerWidth - 8), overflowLeft = 8 - rect.left;
+  if (overflowRight > 0) panel.style.translate = `${-overflowRight}px 0`;
+  else if (overflowLeft > 0) panel.style.translate = `${overflowLeft}px 0`;
+  if (rect.bottom > innerHeight - 8 && rect.top - rect.height - panel.parentElement.offsetHeight > 8) panel.classList.add('up');
+  const up = panel.classList.contains('up');
+  if (!reduce) panel.animate([{ opacity: 0, transform: `translateY(${up ? 6 : -6}px) scale(0.96)` }, { opacity: 1, transform: 'none' }], SPRING);
+  openPanel = { panel, close: () => hidePanel(panel, onClose) };
+}
+function hidePanel(panel, onClose) {
+  if (panel.hidden || panel.dataset.closing) return;
+  if (openPanel?.panel === panel) openPanel = null;
+  onClose?.();
+  if (reduce) { panel.hidden = true; return; }
+  panel.dataset.closing = '1';
+  panel.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: EASE_IN }).onfinish = () => { panel.hidden = true; delete panel.dataset.closing; };
+}
+document.addEventListener('pointerdown', e => {
+  if (openPanel && !openPanel.panel.parentElement.contains(e.target)) openPanel.close();
+});
+
+/* ---------- Combobox: one choice or many ---------- */
+function combobox({ input, field, pop, list, items, multiple = false, render, onPick, emptyText }) {
+  let query = '', active = -1, shown = [];
+  const open = () => { if (pop.hidden) { input.setAttribute('aria-expanded', 'true'); showPanel(pop, () => { input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); }); } };
+  const close = () => hidePanel(pop, () => { input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); });
+  const setActive = (i) => {
+    active = i;
+    list.querySelectorAll('.option').forEach((o, j) => o.classList.toggle('active', j === i));
+    const el = list.children[i];
+    if (el && el.classList.contains('option')) { input.setAttribute('aria-activedescendant', el.id); el.scrollIntoView({ block: 'nearest' }); }
+    else input.removeAttribute('aria-activedescendant');
+  };
+  const draw = () => {
+    const q = fold(query.trim());
+    shown = items().filter(it => !q || fold(it.label).includes(q) || fold(it.sub ?? '').includes(q));
+    list.innerHTML = shown.length
+      ? shown.map((it, i) => `<div class="option${it.sub ? ' two' : ''}" role="option" id="${list.id}-${it.id}" aria-selected="${it.selected}">${render(it, query.trim())}<svg class="tick" viewBox="0 0 12 12"><use href="#check"/></svg></div>`).join('')
+      : `<div class="no-match" role="presentation">${emptyText(query.trim())}</div>`;
+    const firstSelected = shown.findIndex(it => it.selected);
+    setActive(shown.length ? (q ? 0 : Math.max(0, firstSelected)) : -1);
+  };
+  const pick = (i) => {
+    const it = shown[i]; if (!it) return;
+    onPick(it);
+    if (multiple) { query = ''; input.value = ''; draw(); setActive(Math.min(i, shown.length - 1)); }
+    else close();
+  };
+  input.addEventListener('input', () => { query = input.value; open(); draw(); });
+  input.addEventListener('focus', () => { query = multiple ? input.value : ''; draw(); open(); if (!multiple) input.select(); });
+  input.addEventListener('click', () => { if (pop.hidden) { query = multiple ? input.value : ''; draw(); open(); if (!multiple) input.select(); } });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (pop.hidden) { draw(); open(); return; }
+      if (!shown.length) return;
+      setActive((active + (e.key === 'ArrowDown' ? 1 : -1) + shown.length) % shown.length);
+    } else if (e.key === 'Enter') {
+      if (!pop.hidden && active >= 0) { e.preventDefault(); pick(active); }
+    } else if (e.key === 'Escape') {
+      if (!pop.hidden) { e.preventDefault(); e.stopPropagation(); close(); }
+      field.dispatchEvent(new CustomEvent('restore'));
+    } else if (e.key === 'Tab') close();
+  });
+  list.addEventListener('pointerdown', e => e.preventDefault());
+  list.addEventListener('click', e => { const o = e.target.closest('.option'); if (o) pick([...list.children].indexOf(o)); });
+  list.addEventListener('pointermove', e => { const o = e.target.closest('.option'); if (o) { const i = [...list.children].indexOf(o); if (i !== active) setActive(i); } });
+  field.addEventListener('pointerdown', e => { if (e.target === field) { e.preventDefault(); input.focus(); } });
+  field.querySelector('.combo-toggle').addEventListener('pointerdown', e => {
+    e.preventDefault();
+    if (!pop.hidden) { close(); return; }
+    query = ''; if (document.activeElement !== input) input.focus(); else { draw(); open(); }
+  });
+  input.addEventListener('blur', () => { close(); field.dispatchEvent(new CustomEvent('restore')); });
+  return { draw, close };
+}
+
+/* Searchable select */
+(() => {
+  const people = [['Ana Costa', 'Head chef'], ['Marko Petrović', 'Sous chef'], ['Eleni Papadaki', 'Front of house'], ['Nikos Georgiou', 'Bartender'], ['Sofia Rossi', 'Pastry'],
+    ['Jonas Berg', 'Line cook'], ['Maria Ioannou', 'Manager'], ['Tom Walsh', 'Server'], ['Lena Fischer', 'Server'], ['Yusuf Demir', 'Kitchen porter'], ['Clara Martin', 'Host'], ['Dimitris Kostas', 'Owner']]
+    .map(([label, sub], i) => ({ id: i, label, sub, cat: CATS[i % CATS.length], initials: label.split(' ').map(w => w[0]).join(''), selected: i === 0 }));
+  const input = document.getElementById('assign-input'), field = document.getElementById('assign-field'), avatar = document.getElementById('assign-avatar');
+  const paintChoice = () => {
+    const chosen = people.find(p => p.selected);
+    input.value = chosen ? chosen.label : '';
+    avatar.hidden = !chosen;
+    if (chosen) { avatar.textContent = chosen.initials; avatar.style.cssText = `--tint:var(--cat-${chosen.cat}-tint);--text:var(--cat-${chosen.cat}-text)`; }
+  };
+  field.addEventListener('restore', paintChoice);
+  combobox({
+    input, field, pop: document.getElementById('assign-pop'), list: document.getElementById('assign-list'), items: () => people,
+    render: (p, q) => `<span class="avatar" style="--tint:var(--cat-${p.cat}-tint);--text:var(--cat-${p.cat}-text)" aria-hidden="true">${p.initials}</span><span class="text"><span class="name">${highlight(p.label, q)}</span><span class="sub">${highlight(p.sub, q)}</span></span>`,
+    onPick: p => { people.forEach(x => x.selected = x === p); paintChoice(); },
+    emptyText: q => `No one called “${escapeHtml(q)}”.`,
+  });
+  paintChoice();
+})();
+
+/* Multi-select */
+(() => {
+  const allergens = ['Gluten', 'Crustaceans', 'Eggs', 'Fish', 'Peanuts', 'Soy', 'Milk', 'Nuts', 'Celery', 'Mustard', 'Sesame', 'Sulphites', 'Lupin', 'Molluscs']
+    .map((label, i) => ({ id: i, label, selected: label === 'Gluten' || label === 'Milk' }));
+  const input = document.getElementById('allergen-input'), field = document.getElementById('allergen-field'), status = document.getElementById('allergen-status');
+  let fresh = null, control = null;
+  const paintTokens = () => {
+    field.querySelectorAll('.token').forEach(t => t.remove());
+    allergens.filter(a => a.selected).forEach(a => {
+      const token = document.createElement('span');
+      token.className = 'token' + (a === fresh ? ' arrive' : '');
+      token.innerHTML = `${a.label}<button class="remove" type="button" aria-label="Remove ${a.label}"><svg><use href="#x-fill"/></svg></button>`;
+      token.querySelector('.remove').addEventListener('pointerdown', e => e.preventDefault());
+      token.querySelector('.remove').addEventListener('click', () => { toggle(a); input.focus(); });
+      field.insertBefore(token, input);
+    });
+    fresh = null;
+    input.placeholder = allergens.some(a => a.selected) ? '' : 'Add allergens';
+  };
+  const toggle = (a) => {
+    a.selected = !a.selected;
+    fresh = a.selected ? a : null;
+    status.textContent = `${a.label} ${a.selected ? 'added' : 'removed'}`;
+    paintTokens();
+    if (!document.getElementById('allergen-pop').hidden) control.draw();
+  };
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Backspace' && input.value === '') {
+      const last = allergens.filter(a => a.selected).pop();
+      if (last) { e.preventDefault(); toggle(last); }
+    }
+  });
+  control = combobox({
+    input, field, multiple: true, pop: document.getElementById('allergen-pop'), list: document.getElementById('allergen-list'), items: () => allergens,
+    render: (a, q) => `<span class="text"><span class="name">${highlight(a.label, q)}</span></span>`,
+    onPick: a => toggle(a),
+    emptyText: q => `No allergen called “${escapeHtml(q)}”.`,
+  });
+  field.addEventListener('restore', () => { input.value = ''; });
+  paintTokens();
+})();
+
+/* Pop-up button and rich menu */
+(() => {
+  const dishes = [
+    { name: 'Greek salad', price: 9.5, added: 3, orders: 41, course: 'Starters', diet: 'Vegetarian', sold: false },
+    { name: 'Moussaka', price: 16, added: 6, orders: 58, course: 'Mains', diet: 'Meat', sold: false },
+    { name: 'Grilled octopus', price: 19, added: 1, orders: 22, course: 'Mains', diet: 'Fish', sold: true },
+    { name: 'Spinach pie', price: 8, added: 5, orders: 30, course: 'Starters', diet: 'Vegetarian', sold: false },
+    { name: 'Lemon chicken', price: 15, added: 2, orders: 36, course: 'Mains', diet: 'Meat', sold: false },
+  ];
+  const state = { sort: 'newest', group: 'none', showSold: true };
+  const sorters = { newest: (a, b) => b.added - a.added, name: (a, b) => a.name.localeCompare(b.name), price: (a, b) => a.price - b.price, popular: (a, b) => b.orders - a.orders };
+  const listEl = document.getElementById('dish-list');
+  const row = d => `<div class="dish-row${d.sold ? ' sold' : ''}"><span class="name">${d.name}</span>${d.sold ? '<span class="tag">Sold out</span>' : ''}<span class="price">€${d.price.toFixed(2)}</span></div>`;
+  const paint = () => {
+    const visible = dishes.filter(d => state.showSold || !d.sold).sort(sorters[state.sort]);
+    if (state.group === 'none') { listEl.innerHTML = visible.map(row).join(''); return; }
+    const key = state.group === 'course' ? 'course' : 'diet';
+    const groups = [...new Set(visible.map(d => d[key]))];
+    listEl.innerHTML = groups.map(g => `<div class="group-head">${g}</div>${visible.filter(d => d[key] === g).map(row).join('')}`).join('');
+  };
+  const button = document.getElementById('sort-btn'), menu = document.getElementById('sort-menu'), sub = document.getElementById('group-menu'), groupItem = document.getElementById('group-item');
+  const items = m => [...m.querySelectorAll('.menu-item')].filter(el => el.closest('[role=menu]') === m && el.offsetParent !== null);
+  const closeSub = (focusParent) => {
+    if (sub.hidden) return;
+    groupItem.setAttribute('aria-expanded', 'false');
+    sub.hidden = true;
+    if (focusParent) groupItem.focus();
+  };
+  const openSub = () => {
+    sub.hidden = false;
+    groupItem.setAttribute('aria-expanded', 'true');
+    const anchor = button.parentElement.getBoundingClientRect(), m = menu.getBoundingClientRect(), it = groupItem.getBoundingClientRect();
+    sub.classList.remove('left', 'over');
+    let left = m.right + 4;
+    if (left + sub.offsetWidth > innerWidth - 8) { left = m.left - 4 - sub.offsetWidth; sub.classList.add('left'); }
+    if (left < 8) { left = m.left + (m.width - sub.offsetWidth) / 2; sub.classList.remove('left'); sub.classList.add('over'); }
+    sub.style.left = (left - anchor.left) + 'px';
+    sub.style.top = (sub.classList.contains('over') ? m.top - anchor.top : it.top - anchor.top - 6) + 'px';
+    const over = sub.classList.contains('over');
+    if (over) { sub.style.left = (m.left - anchor.left) + 'px'; sub.style.width = m.width + 'px'; sub.style.minHeight = m.height + 'px'; }
+    else { sub.style.width = ''; sub.style.minHeight = ''; }
+    if (!reduce) sub.animate([{ opacity: 0, transform: 'scale(0.96)' }, { opacity: 1, transform: 'none' }], SPRING);
+    (sub.querySelector('[aria-checked="true"]') || items(sub).find(x => x.offsetParent))?.focus();
+  };
+  const closeMenu = (focusButton = true) => {
+    closeSub(false);
+    hidePanel(menu, () => button.setAttribute('aria-expanded', 'false'));
+    if (focusButton) button.focus();
+  };
+  const openMenu = () => {
+    button.setAttribute('aria-expanded', 'true');
+    showPanel(menu, () => { button.setAttribute('aria-expanded', 'false'); closeSub(false); });
+    (menu.querySelector('[aria-checked="true"]') || items(menu)[0]).focus();
+  };
+  button.addEventListener('click', () => menu.hidden ? openMenu() : closeMenu());
+  button.addEventListener('keydown', e => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); openMenu(); } });
+  const navigate = (m, e) => {
+    const list = items(m), i = list.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') { e.preventDefault(); list[(i + 1) % list.length].focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); list[(i - 1 + list.length) % list.length].focus(); }
+    else if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); list[e.key === 'Home' ? 0 : list.length - 1].focus(); }
+    else if (e.key === 'Tab') { e.preventDefault(); closeMenu(); }
+    else if (e.key.length === 1 && /\S/.test(e.key)) {
+      const starts = it => it.querySelector('.text').firstChild.textContent.trim().toLowerCase().startsWith(e.key.toLowerCase());
+      (list.find((it, j) => j > i && starts(it)) || list.find(starts))?.focus();
+    }
+  };
+  menu.addEventListener('keydown', e => {
+    if (e.target === groupItem && (e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openSub(); return; }
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeMenu(); return; }
+    navigate(menu, e);
+  });
+  sub.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft' || e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeSub(true); return; }
+    navigate(sub, e);
+  });
+  menu.addEventListener('pointerover', e => {
+    if (e.pointerType !== 'mouse') return;
+    const it = e.target.closest('.menu-item');
+    if (it === groupItem && sub.hidden) openSub(); else if (it && it !== groupItem && !sub.hidden) closeSub(false);
+  });
+  menu.addEventListener('click', e => {
+    const it = e.target.closest('.menu-item'); if (!it) return;
+    if (it === groupItem) { sub.hidden ? openSub() : closeSub(true); return; }
+    if (it.dataset.sort) {
+      state.sort = it.dataset.sort;
+      menu.querySelectorAll('[data-sort]').forEach(x => x.setAttribute('aria-checked', String(x === it)));
+      document.getElementById('sort-value').textContent = it.querySelector('.text').firstChild.textContent.trim();
+    }
+    if (it.id === 'show-sold') { state.showSold = !state.showSold; it.setAttribute('aria-checked', String(state.showSold)); }
+    paint(); closeMenu();
+  });
+  sub.addEventListener('click', e => {
+    const it = e.target.closest('.menu-item'); if (!it) return;
+    if (it.classList.contains('menu-back')) { closeSub(true); return; }
+    state.group = it.dataset.group;
+    sub.querySelectorAll('[data-group]').forEach(x => x.setAttribute('aria-checked', String(x === it)));
+    document.getElementById('group-value').textContent = it.textContent.trim();
+    paint(); closeMenu();
+  });
+  document.addEventListener('pointerdown', e => { if (!sub.hidden && !sub.contains(e.target) && !menu.contains(e.target)) closeSub(false); });
+  paint();
+})();
+
+/* Time picker */
+document.querySelectorAll('.time-anchor').forEach((anchor, index) => {
+  const labelId = anchor.previousElementSibling.id;
+  let [hour, minute] = anchor.dataset.time.split(':').map(Number);
+  const pad = n => String(n).padStart(2, '0');
+  anchor.innerHTML = `<button class="select" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="${labelId} time-${index}"><span id="time-${index}"></span><svg class="icon"><use href="#clock"/></svg></button>
+    <div class="pop time-pop" role="dialog" aria-labelledby="${labelId}" hidden>
+      <div class="wheels">
+        <div class="wheel" role="listbox" tabindex="0" aria-label="Hour" data-unit="hour">${Array.from({ length: 24 }, (_, h) => `<div class="wheel-item" role="option" data-v="${h}">${pad(h)}</div>`).join('')}</div>
+        <span class="wheel-colon" aria-hidden="true">:</span>
+        <div class="wheel" role="listbox" tabindex="0" aria-label="Minutes" data-unit="minute">${Array.from({ length: 12 }, (_, m) => `<div class="wheel-item" role="option" data-v="${m * 5}">${pad(m * 5)}</div>`).join('')}</div>
+      </div>
+      <div class="time-foot"><span class="footnote">${index === 0 ? 'First orders' : 'Last orders 30 min before'}</span><button class="plain" type="button">Done</button></div>
+    </div>`;
+  const button = anchor.querySelector('.select'), pop = anchor.querySelector('.pop'), out = anchor.querySelector(`#time-${index}`);
+  const wheels = [...anchor.querySelectorAll('.wheel')];
+  const valueOf = w => w.dataset.unit === 'hour' ? hour : minute;
+  const paintOut = () => { out.textContent = `${pad(hour)}:${pad(minute)}`; };
+  const mark = (w) => {
+    const v = valueOf(w);
+    w.querySelectorAll('.wheel-item').forEach(it => it.setAttribute('aria-selected', String(+it.dataset.v === v)));
+    w.setAttribute('aria-activedescendant', '');
+  };
+  const scrollTo = (w, smooth) => {
+    const it = w.querySelector(`[data-v="${valueOf(w)}"]`);
+    w.scrollTo({ top: it.offsetTop - 80, behavior: smooth && !reduce ? 'smooth' : 'auto' });
+  };
+  const setValue = (w, v, smooth = true) => {
+    if (w.dataset.unit === 'hour') hour = v; else minute = v;
+    mark(w); paintOut(); scrollTo(w, smooth);
+  };
+  wheels.forEach(w => {
+    let settle = 0;
+    w.addEventListener('scroll', () => {
+      clearTimeout(settle);
+      settle = setTimeout(() => {
+        const items = [...w.querySelectorAll('.wheel-item')];
+        const centered = items[Math.round(w.scrollTop / 40)] ?? items[items.length - 1];
+        const v = +centered.dataset.v;
+        if (v !== valueOf(w)) { if (w.dataset.unit === 'hour') hour = v; else minute = v; mark(w); paintOut(); }
+      }, 90);
+    });
+    w.addEventListener('click', e => { const it = e.target.closest('.wheel-item'); if (it) setValue(w, +it.dataset.v); });
+    w.addEventListener('keydown', e => {
+      const values = [...w.querySelectorAll('.wheel-item')].map(it => +it.dataset.v), i = values.indexOf(valueOf(w));
+      const next = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: values.length - 1, PageDown: i + 4, PageUp: i - 4 }[e.key];
+      if (next !== undefined) { e.preventDefault(); setValue(w, values[Math.max(0, Math.min(values.length - 1, next))]); }
+      else if (e.key === 'Enter') { e.preventDefault(); close(true); }
+      else if (e.key === 'ArrowRight' && w === wheels[0]) { e.preventDefault(); wheels[1].focus(); }
+      else if (e.key === 'ArrowLeft' && w === wheels[1]) { e.preventDefault(); wheels[0].focus(); }
+    });
+  });
+  const close = (focusButton) => { hidePanel(pop, () => button.setAttribute('aria-expanded', 'false')); if (focusButton) button.focus(); };
+  const open = () => {
+    button.setAttribute('aria-expanded', 'true');
+    showPanel(pop, () => button.setAttribute('aria-expanded', 'false'));
+    wheels.forEach(w => { mark(w); scrollTo(w, false); });
+    wheels[0].focus({ preventScroll: true });
+  };
+  button.addEventListener('click', () => pop.hidden ? open() : close(true));
+  pop.querySelector('.plain').addEventListener('click', () => close(true));
+  pop.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); }
+    if (e.key === 'Tab') {
+      const stops = [...wheels, pop.querySelector('.plain')], i = stops.indexOf(document.activeElement);
+      e.preventDefault(); stops[(i + (e.shiftKey ? -1 : 1) + stops.length) % stops.length].focus();
+    }
+  });
+  paintOut();
+});
+
+/* Option list */
+(() => {
+  const group = document.getElementById('order-choice'), choices = [...group.querySelectorAll('.choice')];
+  const choose = (c, focus) => { choices.forEach(x => { x.setAttribute('aria-checked', String(x === c)); x.tabIndex = x === c ? 0 : -1; }); if (focus) c.focus(); };
+  choices.forEach(c => c.addEventListener('click', () => choose(c)));
+  group.addEventListener('keydown', e => {
+    const i = choices.indexOf(document.activeElement); if (i < 0) return;
+    const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+    if (step) { e.preventDefault(); choose(choices[(i + step + choices.length) % choices.length], true); }
+  });
+})();
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && openPanel) openPanel.close(); });
+
+const root = document.documentElement;
+try { const saved = localStorage.getItem('graphite-theme'); if (saved) root.dataset.theme = saved; } catch {}
+document.getElementById('theme').onclick = () => {
+  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+  try { localStorage.setItem('graphite-theme', root.dataset.theme); } catch {}
+};
+</script>
+</body>
+</html>

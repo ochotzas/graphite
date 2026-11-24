@@ -2,6 +2,19 @@
 
 Graphite by Olger Chotza — https://ochotzas.com
 
+## 2.2.0 — 2026-11-24
+Motion learned in MenuOS, brought back to every project.
+- New signature effect: Push and pop. Paths decide push, pop, tab or swap; phones slide like a navigation stack (old page at −28%, 70% opacity), wide screens swap the detail pane, edge swipe back with velocity.
+- Everyday: new row in place (blur in + marker pop), menu and popover opening, and waiting indicators (spinner, sweep, skeleton) with exact timings and reduced-motion versions.
+- Lift to reorder: the moved row shows a fading highlight after keyboard or menu moves.
+- Chips reworked, Apple style. Filter chips are buttons: 32-tall capsules, body text, `ink` when selected, 44 hit area. Tags are labels: 22-tall tinted capsules whose text takes the color, no dots; optional status icon; removable tags with a filled ×. New `cat-*-text` tokens keep category text at ≥ 4.5:1 on its tint.
+- Date picker reworked: 7 equal columns that never overflow (days shrink up to 44), plain chevron arrows, month slides in its direction, chosen date in words with a Today button, arrow-key navigation across months.
+- Selectors: searchable select (combobox), multi-select with removable tags, pop-up button, rich menu with sections, subtitles, submenu and toggle items, time picker with snapping wheels, option list. Which-selector guide in `components.md`; working page `examples/selectors.html`.
+- `examples/motion.html`: demos for Push and pop and for arrivals and waiting.
+- Zoom open reworked to the iOS feel: the card itself grows into its page on `transform`, its image growing into the header; no card copy on top, no title swap, and the list behind stays still with a light dim.
+- Photo fly-in: one spring drives the screen, sheet and flying image together; the image moves with transform and a crop (works for real photos without stretching); the dimmed screen uses a black layer instead of a brightness filter.
+- Lift to reorder: the island keeps its rounded corners (rows are see-through, only the lifted row gets a fill); the list reorders only after both drop springs settle (a row no longer stays offset after a drop), and grabbing another row mid-drop finishes the first drop at once.
+
 ## 2.1.0 — 2026-11-13
 - Snappier spring: stiffness 620, damping 44 (was 380 / 30). ~0.3% overshoot, settles in ~350ms. SwiftUI `.spring(response: 0.25, dampingFraction: 0.88)`.
 - Liquid tab edges keep the default's damping ratio: fast 837 / 51 (~310ms), slow 434 / 37 (~420ms).

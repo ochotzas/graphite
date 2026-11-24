@@ -133,7 +133,10 @@
   @keyframes blur-in { from { opacity: 0; filter: blur(8px); transform: translateY(6px) scale(0.98); } to { opacity: 1; filter: none; transform: none; } }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-  .zoom-under { transform-origin: 50% 0; }
+  .zoom-under, .fly-screen { transform-origin: 50% 0; will-change: transform; }
+  .fly-screen.moving { border-radius: 26px; }
+  .dim { position: absolute; inset: 0; z-index: 3; background: #000; opacity: 0; pointer-events: none; border-radius: inherit; }
+  .zoom-detail { transform-origin: 0 0; will-change: transform; }
   .zoom-cards { display: flex; flex-direction: column; gap: var(--island-gap); }
   .zoom-card { display: block; width: 100%; padding: 0; border: 0; text-align: left; font: inherit; color: inherit; background: var(--surface); border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; transition: transform var(--dur) var(--ease); -webkit-tap-highlight-color: transparent; }
   .zoom-card:active { transform: scale(var(--press)); transition-duration: 90ms; }
@@ -146,10 +149,9 @@
   .icon-btn { position: absolute; top: 14px; left: 14px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
 
   .thumb { flex: none; width: 40px; height: 40px; border-radius: var(--radius-sm); }
-  .fly-screen { transform-origin: 50% 0; }
   .fly-scrim { position: absolute; inset: 0; background: var(--scrim); opacity: 0; pointer-events: none; z-index: 4; }
   .fly-scrim.on { pointer-events: auto; }
-  .fly-sheet { position: absolute; left: 0; right: 0; bottom: 0; top: 40px; z-index: 5; background: var(--bg); border-radius: 28px 28px 0 0; overflow: hidden; touch-action: none; cursor: grab; box-shadow: var(--shadow-float); }
+  .fly-sheet { will-change: transform; position: absolute; left: 0; right: 0; bottom: 0; top: 40px; z-index: 5; background: var(--bg); border-radius: 28px 28px 0 0; overflow: hidden; touch-action: none; cursor: grab; box-shadow: var(--shadow-float); }
   .fly-sheet[hidden] { display: none; }
   .fly-hero { height: 150px; border-radius: 28px 28px 0 0; }
   .fly-body { padding: 16px 18px; }
@@ -166,10 +168,10 @@
   .armed-front { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; background: var(--surface); touch-action: pan-y; cursor: grab; user-select: none; will-change: transform; }
 
   .reorder { position: relative; }
-  .reorder-row { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 6px 0 16px; background: var(--surface); user-select: none; -webkit-touch-callout: none; }
+  .reorder-row { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 6px 0 16px; background: transparent; user-select: none; -webkit-touch-callout: none; }
   .reorder-row + .reorder-row { box-shadow: inset 0 1px 0 var(--line); }
   .reorder-row .grip { flex: none; width: 40px; height: 40px; border: 0; border-radius: 50%; background: none; color: var(--ink-3); display: grid; place-items: center; cursor: grab; touch-action: none; }
-  .reorder-row.lifted { z-index: 3; border-radius: var(--radius-md); box-shadow: var(--shadow-float); }
+  .reorder-row.lifted { z-index: 3; background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-float); }
   .reorder-row.lifted + .reorder-row { box-shadow: none; }
   .reorder-row.sliding { transition: transform var(--dur) var(--ease); }
   .island-clip { border-radius: var(--radius-lg); }
@@ -182,10 +184,55 @@
   .morph-ring .trk { opacity: 0.25; }
   .morph-done { display: flex; align-items: center; justify-content: center; gap: 8px; }
   .morph-done svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+  .arrive-head { display: flex; justify-content: space-between; align-items: center; margin: 0 0 16px; }
+  .arrive-head .title { margin: 0; }
+  .more-btn { position: relative; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+  .more-btn .icon { width: 18px; height: 18px; }
+  .menu-panel { position: absolute; top: 64px; right: 18px; z-index: 4; width: 210px; padding: 6px; border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-float); transform-origin: 100% 0; }
+  .menu-panel[hidden] { display: none; }
+  .menu-panel.opening { animation: menu-in var(--dur-spring) var(--spring); }
+  .menu-panel.closing { animation: menu-out var(--dur-base) var(--ease-out) forwards; }
+  .menu-panel button { display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 10px; border: 0; border-radius: var(--radius-sm); background: none; color: var(--ink); font: 400 16px var(--font); text-align: left; cursor: pointer; }
+  .menu-panel button:hover, .menu-panel button:focus-visible { background: var(--press); outline: none; }
+  .menu-panel .icon { width: 20px; height: 20px; color: var(--ink-2); }
+  @keyframes menu-in { from { opacity: 0; transform: translateY(-6px) scale(0.96); } }
+  @keyframes menu-out { to { opacity: 0; } }
+  .dish-row { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; }
+  .dish-row + .dish-row { box-shadow: inset 0 1px 0 var(--line); }
+  .dish-row .row-title { flex: 1; }
+  .changed-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .dish-row.arriving { animation: blur-in var(--dur-spring) var(--spring); }
+  .dish-row.arriving .changed-dot { animation: popin var(--dur-spring) var(--spring); }
+  .dish-row::after { content: ""; position: absolute; inset: 0; background: var(--press); opacity: 0; pointer-events: none; }
+  .dish-row.moved::after { animation: highlight-fade 700ms var(--ease-out); }
+  @keyframes highlight-fade { from { opacity: 1; } to { opacity: 0; } }
+  .waiting-line { display: flex; align-items: center; gap: 8px; height: 22px; margin-top: 14px; }
+  .waiting-line[hidden] { display: none; }
+  .spinner { width: 16px; height: 16px; fill: none; stroke: var(--ink-2); animation: spin 900ms linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .sweep-bar { position: relative; height: 4px; border-radius: 99px; background: var(--track); overflow: hidden; margin-bottom: 12px; }
+  .sweep-bar i { position: absolute; inset-block: 0; width: 40%; border-radius: 99px; background: var(--ink); animation: sweep 1.4s var(--ease-out) infinite; }
+  @keyframes sweep { from { left: -40%; } to { left: 100%; } }
+  .skel-row { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; animation: skeleton 1.2s ease-in-out infinite alternate; }
+  .skel-row + .skel-row { box-shadow: inset 0 1px 0 var(--line); }
+  .skel-row i { display: block; height: 12px; border-radius: 99px; background: var(--track); }
+  @keyframes skeleton { from { opacity: 1; } to { opacity: 0.6; } }
+  .rise-in { animation: rise-in var(--dur-spring) var(--spring); }
+  @keyframes rise-in { from { opacity: 0; transform: translateY(10px); } }
+
+  .nav-page { will-change: transform; }
+  .nav-page .icon-btn { position: static; margin: -4px 0 6px -4px; }
+  .nav-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 52px; padding: 0 12px 0 16px; border: 0; background: none; color: var(--ink); font: 500 15px var(--font); text-align: left; cursor: pointer; }
+  .nav-row + .nav-row { box-shadow: inset 0 1px 0 var(--line); }
+  .nav-row:active { background: var(--press); }
+  .nav-row .row-title { flex: 1; }
+  .nav-row .icon { color: var(--ink-3); width: 18px; height: 18px; }
+  .nav-path { margin-top: auto; text-align: center; font: 500 12px var(--font); color: var(--ink-3); font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="ck" viewBox="0 0 12 12"><path d="M2.5 6.3l2.3 2.2L9.5 3.5"/></symbol><symbol id="back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol><symbol id="grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="chev" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol><symbol id="dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol><symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></symbol><symbol id="up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol><symbol id="ck" viewBox="0 0 12 12"><path d="M2.5 6.3l2.3 2.2L9.5 3.5"/></symbol><symbol id="back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol><symbol id="grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></symbol></svg>
 
 <main class="page">
   <h1 class="h1">Motion</h1>
@@ -193,10 +240,24 @@
 
   <!-- ================= Everyday ================= -->
   <div class="sec-head">
-    <div><h2 class="h2">Everyday</h2><p class="footnote" style="margin-top:4px">Press, check, count, progress, toast, sheet with push back.</p></div>
+    <div><h2 class="h2">Everyday</h2><p class="footnote" style="margin-top:4px">Press, check, count, progress, toast, sheet with push back, new rows, menus, waiting.</p></div>
     <button class="btn btn-primary btn-sm" id="playall">Play</button>
   </div>
-  <div class="grid" id="feels"></div>
+  <div class="grid" id="feels">
+    <section class="card">
+      <header><p class="label"><b>+</b>Arrivals and waiting</p><p class="footnote">Open the ⋯ menu: add a dish, move the last one up, or refresh to see the waiting states.</p></header>
+      <div class="stage short"><div class="screen">
+        <div class="arrive-head"><p class="title">Lunch</p><button class="more-btn" id="arrive-more" aria-haspopup="menu" aria-expanded="false" aria-label="More"><svg class="icon"><use href="#dots"/></svg></button></div>
+        <div class="menu-panel" id="arrive-menu" role="menu" hidden>
+          <button role="menuitem" data-act="add"><svg class="icon"><use href="#plus"/></svg>Add dish</button>
+          <button role="menuitem" data-act="up"><svg class="icon"><use href="#up"/></svg>Move last dish up</button>
+          <button role="menuitem" data-act="refresh"><svg class="icon"><use href="#refresh"/></svg>Refresh</button>
+        </div>
+        <div id="arrive-body"></div>
+        <div class="waiting-line" id="arrive-wait" hidden><svg class="spinner" viewBox="0 0 16 16"><path d="M8 2a6 6 0 1 1-6 6" stroke-width="2" stroke-linecap="round"/></svg><span class="footnote">Updating…</span></div>
+      </div></div>
+    </section>
+  </div>
 
   <!-- ================= Signature ================= -->
   <div class="sec-head">
@@ -293,9 +354,10 @@
     </section>
 
     <section class="card">
-      <header><p class="label"><b>9</b>Zoom open</p><p class="footnote">The card grows into its screen and the image flies to the header. Drag from the left edge to shrink it back.</p></header>
-      <div class="stage short black" id="zoom">
+      <header><p class="label"><b>9</b>Zoom open</p><p class="footnote">The card grows into its screen and its image grows into the header. Drag from the left edge to shrink it back.</p></header>
+      <div class="stage short" id="zoom">
         <div class="screen zoom-under">
+          <div class="dim"></div>
           <p class="title" style="margin-top:0">Trips</p>
           <div class="zoom-cards">
             <button class="zoom-card" data-trip="0"><span class="cover" style="background:var(--cat-slate)"></span><span class="zoom-card-text">Lisbon<span class="footnote">4 days</span></span></button>
@@ -309,6 +371,7 @@
       <header><p class="label"><b>10</b>Photo fly-in</p><p class="footnote">The thumbnail flies into the sheet header, and back when the sheet closes. Fling the sheet down to close it.</p></header>
       <div class="stage short black" id="fly">
         <div class="screen fly-screen">
+          <div class="dim"></div>
           <p class="title" style="margin-top:0">Packing</p>
           <div class="island" style="overflow:hidden" id="fly-list"></div>
         </div>
@@ -355,6 +418,12 @@
       </div></div>
     </section>
 
+
+    <section class="card">
+      <header><p class="label"><b>14</b>Push and pop</p><p class="footnote">Tap a row to go deeper. Go back with the button or drag from the left edge.</p></header>
+      <div class="stage short" id="nav-stage"></div>
+    </section>
+
   </div>
 </main>
 
@@ -392,17 +461,19 @@ const velocityTracker = () => {
   };
 };
 const relRect = (el, stage) => { const r = el.getBoundingClientRect(), s = stage.getBoundingClientRect(); return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height }; };
-const flyGhost = (stage, color, fromRect, toRectFn, radiusFrom, radiusTo, onDone) => {
-  const ghost = document.createElement('div'); ghost.className = 'ghost'; ghost.style.background = color;
+const lerpRect = (a, b, t) => ({ x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), w: lerp(a.w, b.w, t), h: lerp(a.h, b.h, t) });
+const makeGhost = (stage, color, base) => {
+  const ghost = document.createElement('div'); ghost.className = 'ghost';
+  ghost.style.background = color; ghost.style.width = base.w + 'px'; ghost.style.height = base.h + 'px';
   stage.appendChild(ghost);
-  const draw = (p) => {
-    const to = toRectFn();
-    ghost.style.width = lerp(fromRect.w, to.w, p) + 'px'; ghost.style.height = lerp(fromRect.h, to.h, p) + 'px';
-    ghost.style.transform = `translate(${lerp(fromRect.x, to.x, p)}px, ${lerp(fromRect.y, to.y, p)}px)`;
-    ghost.style.borderRadius = lerp(radiusFrom, radiusTo, clamp(p, 0, 1)) + 'px';
-  };
-  draw(0);
-  spring({ from: 0, to: 1, precision: 0.001, onUpdate: draw, onDone: () => { ghost.remove(); onDone?.(); } });
+  return ghost;
+};
+const placeGhost = (ghost, base, rect, topRadius, bottomRadius) => {
+  const scale = Math.max(rect.w / base.w, rect.h / base.h);
+  const cropX = (base.w * scale - rect.w) / 2, cropY = (base.h * scale - rect.h) / 2;
+  ghost.style.transform = `translate(${rect.x - cropX}px, ${rect.y - cropY}px) scale(${scale})`;
+  const t = Math.max(0, topRadius) / scale, b = Math.max(0, bottomRadius) / scale;
+  ghost.style.clipPath = `inset(${cropY / scale}px ${cropX / scale}px round ${t}px ${t}px ${b}px ${b}px)`;
 };
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function rollNumber(el, value, spring) {
@@ -424,7 +495,7 @@ function rollNumber(el, value, spring) {
 /* ---------- Part 1: feels ---------- */
 const TASKS = [['Call the bank', '9:00', 1], ['Pick up film', '11:30', 1], ['Review Q3 budget', '14:00', 0], ['Run 5k by the river', '18:30', 0], ['Book flights', '', 0]];
 const feelsEl = document.getElementById('feels');
-feelsEl.innerHTML = FEELS.map(f => `
+feelsEl.insertAdjacentHTML('afterbegin', FEELS.map(f => `
   <section class="card">
     <header><p class="label"><b>${f.k}</b>${f.name}</p><p class="footnote">${f.desc}</p></header>
     <div class="stage feel e1" data-k="${f.k}">
@@ -442,7 +513,7 @@ feelsEl.innerHTML = FEELS.map(f => `
       <div class="sheet"><div class="grabber"></div><div class="sheet-head">New task<button class="btn btn-secondary btn-sm" data-close>Cancel</button></div>
         <input class="input" placeholder="Water the plants"><button class="btn btn-primary btn-block" style="margin-top:12px" data-close>Add task</button></div>
     </div>
-  </section>`).join('');
+  </section>`).join(''));
 
 document.querySelectorAll('.feel').forEach(stage => {
   const f = FEELS.find(x => x.k === stage.dataset.k);
@@ -652,10 +723,17 @@ document.getElementById('playall').onclick = () => {
 })();
 
 (() => {
-  const stage = document.getElementById('zoom'), under = stage.querySelector('.zoom-under');
+  const stage = document.getElementById('zoom'), under = stage.querySelector('.zoom-under'), dim = under.querySelector('.dim');
   const trips = [['Lisbon', 'var(--cat-slate)', '4 days, 9 places saved. Trams, tiles and custard tarts.'], ['Porto', 'var(--cat-sage)', '3 days, 6 places saved. River walks and port lodges.']];
   let open = null;
   const scaled = (r, s, width) => ({ x: width / 2 + (r.x - width / 2) * s, y: r.y * s, w: r.w * s, h: r.h * s });
+  const restingRect = (el) => {
+    const card = el.closest('.zoom-card'), transition = card.style.transition;
+    card.style.transition = 'none'; card.style.transform = 'none';
+    const rect = relRect(el, stage);
+    card.style.transform = ''; card.offsetWidth; card.style.transition = transition;
+    return rect;
+  };
   const buildDetail = ([name, color, text]) => {
     const detail = document.createElement('div');
     detail.className = 'screen zoom-detail';
@@ -664,36 +742,34 @@ document.getElementById('playall').onclick = () => {
   };
   const zoomOpen = (card) => {
     if (open) return;
-    const [, color] = trips[+card.dataset.trip];
     const detail = buildDetail(trips[+card.dataset.trip]);
     stage.appendChild(detail);
-    const hero = detail.querySelector('.zoom-hero'), cover = card.querySelector('.cover');
-    const width = stage.clientWidth, height = stage.clientHeight;
-    const cardRect = relRect(card, stage), coverRect = relRect(cover, stage), heroRect = relRect(hero, stage);
-    const ghost = document.createElement('div'); ghost.className = 'ghost'; ghost.style.background = color; stage.appendChild(ghost);
+    const body = detail.querySelector('.zoom-body'), back = detail.querySelector('.icon-btn'), hero = detail.querySelector('.zoom-hero');
+    const width = stage.clientWidth, height = stage.clientHeight, cardRect = restingRect(card), coverRect = restingRect(card.querySelector('.cover'));
+    const heroHeight = hero.offsetHeight, startHero = coverRect.h * width / cardRect.w;
     const entry = { p: 0, anim: null };
-    const hideReal = () => { ghost.style.display = ''; hero.style.visibility = 'hidden'; cover.style.visibility = 'hidden'; };
     const render = (p) => {
       entry.p = p;
-      const s = 1 - 0.06 * p, c = scaled(cardRect, s, width), from = scaled(coverRect, s, width);
-      under.style.transform = `scale(${s})`; under.style.filter = `brightness(${1 - 0.18 * p})`; under.style.borderRadius = `${30 * p}px`;
-      const inset = [lerp(c.y, 0, p), lerp(width - c.x - c.w, 0, p), lerp(height - c.y - c.h, 0, p), lerp(c.x, 0, p)].map(v => Math.max(0, v) + 'px').join(' ');
-      detail.style.clipPath = `inset(${inset} round ${Math.max(0, lerp(22 * s, 0, p))}px)`;
-      detail.querySelector('.zoom-body').style.opacity = String(clamp(p * 3 - 1, 0, 1));
-      ghost.style.width = lerp(from.w, heroRect.w, p) + 'px'; ghost.style.height = lerp(from.h, heroRect.h, p) + 'px';
-      ghost.style.transform = `translate(${lerp(from.x, heroRect.x, p)}px, ${lerp(from.y, heroRect.y, p)}px)`;
-      const radius = Math.max(0, lerp(22 * s, 0, p));
-      ghost.style.borderRadius = `${radius}px ${radius}px 0 0`;
+      const t = clamp(p, 0, 1);
+      dim.style.opacity = String(0.12 * t);
+      const frame = { x: lerp(cardRect.x, 0, p), y: lerp(cardRect.y, 0, p), w: lerp(cardRect.w, width, p), h: lerp(cardRect.h, height, p) };
+      const k = frame.w / width, radius = Math.max(0, lerp(22, 0, t));
+      detail.style.transform = `translate(${frame.x}px, ${frame.y}px) scale(${k})`;
+      detail.style.clipPath = `inset(0 0 ${Math.max(0, height - frame.h / k)}px 0 round ${radius / k}px)`;
+      detail.style.background = `color-mix(in srgb, var(--bg) ${Math.round(clamp(p / 0.2, 0, 1) * 100)}%, transparent)`;
+      const shown = lerp(startHero, heroHeight, p);
+      hero.style.clipPath = `inset(0 0 ${Math.max(0, heroHeight - shown)}px 0)`;
+      body.style.transform = `translateY(${shown - heroHeight}px)`;
+      const content = String(clamp((p - 0.25) / 0.3, 0, 1));
+      body.style.opacity = content; back.style.opacity = content;
     };
-    const close = () => {
-      detail.remove(); ghost.remove(); cover.style.visibility = '';
-      under.removeAttribute('style'); open = null;
-    };
+    const rest = () => { detail.style.transform = ''; detail.style.clipPath = ''; detail.style.background = ''; hero.style.clipPath = ''; body.style.transform = ''; };
+    const close = () => { detail.remove(); dim.style.opacity = ''; open = null; };
     entry.settle = (to, velocity = 0) => {
-      entry.anim?.stop(); hideReal();
+      entry.anim?.stop();
       entry.anim = spring({ from: entry.p, to, velocity, precision: 0.001, onUpdate: render, onDone: () => {
-        if (to === 1) { ghost.style.display = 'none'; hero.style.visibility = ''; detail.style.clipPath = ''; }
-        else close();
+        entry.anim = null;
+        if (to === 1) rest(); else close();
       } });
     };
     let startX = null, tracker = null;
@@ -701,7 +777,7 @@ document.getElementById('playall').onclick = () => {
       if (e.target.closest('button') || e.clientX - stage.getBoundingClientRect().left > 28) return;
       e.preventDefault();
       startX = e.clientX; tracker = velocityTracker(); tracker.add(e.clientX, e.clientY);
-      entry.anim?.stop(); hideReal(); render(entry.p);
+      entry.anim?.stop(); entry.anim = null; render(entry.p);
       detail.setPointerCapture(e.pointerId);
     });
     detail.addEventListener('pointermove', e => {
@@ -717,52 +793,75 @@ document.getElementById('playall').onclick = () => {
     };
     detail.addEventListener('pointerup', release);
     detail.addEventListener('pointercancel', release);
-    detail.querySelector('.icon-btn').onclick = () => entry.settle(0);
+    back.onclick = () => entry.settle(0);
     open = entry;
     render(0);
     entry.settle(1);
+    back.focus({ preventScroll: true });
   };
   stage.querySelectorAll('.zoom-card').forEach(card => card.onclick = () => zoomOpen(card));
 })();
 
 (() => {
-  const stage = document.getElementById('fly'), screen = stage.querySelector('.fly-screen'), list = document.getElementById('fly-list');
+  const stage = document.getElementById('fly'), screen = stage.querySelector('.fly-screen'), dim = screen.querySelector('.dim'), list = document.getElementById('fly-list');
   const sheet = document.getElementById('fly-sheet'), scrim = document.getElementById('fly-scrim'), hero = document.getElementById('fly-hero'), title = document.getElementById('fly-title');
   const items = [['Rain jacket', 'var(--cat-slate)', 'Packed'], ['Hiking boots', 'var(--cat-clay)', 'Packed'], ['Camera', 'var(--cat-lilac)', 'To buy']];
   list.innerHTML = items.map(([name, color, state], i) => `<div class="row" style="padding:0 16px" data-item="${i}" tabindex="0" role="button"><span class="thumb" style="background:${color}"></span><span class="row-title">${name}</span><span class="row-trail">${state}</span></div>`).join('');
-  let state = null, closing = null;
-  const thumbRadius = 8, sheetRadius = 28;
+  const thumbRadius = 8, sheetRadius = 28, lift = 40;
+  let state = null;
+  const pushBack = (q) => ({ s: 1 - 0.08 * q, y: 14 * q });
+  const thumbRectAt = (rest, q) => {
+    const { s, y } = pushBack(q), width = stage.clientWidth;
+    return { x: width / 2 + (rest.x - width / 2) * s, y: y + rest.y * s, w: rest.w * s, h: rest.h * s };
+  };
+  const heroRectAt = (st, p) => ({ ...st.heroRest, y: st.heroRest.y + (1 - p) * st.travel });
   const render = (p) => {
-    const height = sheet.offsetHeight, q = clamp(p, 0, 1.2);
-    sheet.style.transform = `translateY(${(1 - p) * (height + 40)}px)`;
+    const st = state, q = clamp(p, 0, 1.2), { s, y } = pushBack(q);
+    sheet.style.transform = `translateY(${(1 - p) * st.travel}px)`;
     scrim.style.opacity = String(clamp(p, 0, 1));
-    screen.style.transform = `translateY(${14 * q}px) scale(${1 - 0.08 * q})`;
-    screen.style.borderRadius = `${26 * clamp(q, 0, 1)}px`;
-    screen.style.filter = `brightness(${1 - 0.25 * clamp(q, 0, 1)})`;
-    if (state) state.p = p;
+    screen.style.transform = `translateY(${y}px) scale(${s})`;
+    dim.style.opacity = String(0.25 * clamp(q, 0, 1));
+    st.p = p;
+    if (st.ghost) {
+      const t = clamp(p, 0, 1);
+      placeGhost(st.ghost, st.heroRest, lerpRect(thumbRectAt(st.thumbRest, q), heroRectAt(st, p), t), lerp(thumbRadius, sheetRadius, t), lerp(thumbRadius, 0, t));
+    }
+  };
+  const flying = (st, on) => {
+    if (on && !st.ghost) st.ghost = makeGhost(stage, st.color, st.heroRest);
+    if (!on && st.ghost) { st.ghost.remove(); st.ghost = null; }
+    hero.style.visibility = on ? 'hidden' : '';
+    st.thumb.style.visibility = on || state === st ? 'hidden' : '';
+  };
+  const settle = (to, velocity = 0) => {
+    const st = state;
+    st.anim?.stop();
+    if (to === 0 || st.ghost) flying(st, true);
+    st.anim = spring({ from: st.p, to, velocity, precision: 0.001, onUpdate: render, onDone: () => {
+      st.anim = null;
+      if (to === 1) { flying(st, false); return; }
+      state = null; flying(st, false);
+      sheet.hidden = true; screen.removeAttribute('style'); screen.classList.remove('moving'); dim.style.opacity = '';
+    } });
   };
   const openSheet = (row) => {
-    if (state || closing) return;
+    if (state) return;
     const [name, color] = items[+row.dataset.item], thumb = row.querySelector('.thumb');
     title.textContent = name; hero.style.background = color;
-    sheet.hidden = false; scrim.classList.add('on');
-    state = { p: 0, anim: null, thumb, color, opener: row };
+    sheet.style.transform = ''; sheet.hidden = false; scrim.classList.add('on');
+    state = { p: 0, anim: null, ghost: null, thumb, color, opener: row, thumbRest: relRect(thumb, stage), heroRest: relRect(hero, stage), travel: sheet.offsetHeight + lift };
+    screen.classList.add('moving');
+    flying(state, true);
     render(0);
-    state.anim = spring({ from: 0, to: 1, precision: 0.001, onUpdate: render });
-    hero.style.visibility = 'hidden'; thumb.style.visibility = 'hidden';
-    flyGhost(stage, color, relRect(thumb, stage), () => relRect(hero, stage), thumbRadius, sheetRadius, () => { hero.style.visibility = ''; });
+    settle(1);
     document.getElementById('fly-close').focus({ preventScroll: true });
   };
   const closeSheet = (velocity = 0) => {
-    if (!state) return;
-    const st = state; st.anim?.stop(); state = null;
-    hero.style.visibility = 'hidden';
-    flyGhost(stage, st.color, relRect(hero, stage), () => relRect(st.thumb, stage), sheetRadius, thumbRadius, () => { st.thumb.style.visibility = ''; });
+    if (!state || state.closing) return;
+    state.closing = true;
     scrim.classList.remove('on');
-    closing = spring({ from: st.p, to: 0, velocity, precision: 0.001, onUpdate: render, onDone: () => {
-      closing = null; sheet.hidden = true; screen.removeAttribute('style'); hero.style.visibility = '';
-    } });
-    st.opener.focus({ preventScroll: true });
+    state.opener.focus({ preventScroll: true });
+    settle(0, velocity);
   };
   list.querySelectorAll('.row').forEach(row => {
     row.onclick = () => openSheet(row);
@@ -771,26 +870,26 @@ document.getElementById('playall').onclick = () => {
   document.getElementById('fly-close').onclick = () => closeSheet();
   scrim.onclick = () => closeSheet();
   sheet.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
-  let startY = null, tracker = null, startP = 1, travel = 1, dragging = false;
+  let startY = null, tracker = null, startP = 1, dragging = false;
   sheet.addEventListener('pointerdown', e => {
-    if (!state || e.button !== 0 || e.target.closest('button')) return;
+    if (!state || state.closing || e.button !== 0 || e.target.closest('button')) return;
     startY = e.clientY; tracker = velocityTracker(); tracker.add(0, e.clientY);
-    startP = state.p; travel = sheet.offsetHeight + 40; state.anim?.stop();
+    state.anim?.stop(); state.anim = null; startP = state.p;
     sheet.setPointerCapture(e.pointerId); dragging = true;
   });
   sheet.addEventListener('pointermove', e => {
     if (!dragging || !state) return;
     tracker.add(0, e.clientY);
     const raw = e.clientY - startY, dy = raw >= 0 ? raw : -Math.sqrt(-raw) * 4;
-    render(startP - dy / travel);
+    render(startP - dy / state.travel);
   });
   const release = () => {
     if (!dragging) return;
     dragging = false;
     if (!state) return;
-    const { vy } = tracker.get();
-    if ((1 - state.p > 1 / 3 && vy > -700) || vy > 700) closeSheet(-vy / travel);
-    else state.anim = spring({ from: state.p, to: 1, velocity: -vy / travel, precision: 0.001, onUpdate: render });
+    const { vy } = tracker.get(), velocity = -vy / state.travel;
+    if ((1 - state.p > 1 / 3 && vy > -700) || vy > 700) closeSheet(velocity);
+    else settle(1, velocity);
   };
   sheet.addEventListener('pointerup', release);
   sheet.addEventListener('pointercancel', release);
@@ -854,7 +953,7 @@ document.getElementById('playall').onclick = () => {
   list.innerHTML = stops.map(name => `<div class="reorder-row"><span class="row-title">${name}</span><button class="grip" aria-label="Reorder ${name}"><svg class="icon"><use href="#grip"/></svg></button></div>`).join('');
   const rowsNow = () => [...list.children];
   const announce = row => { status.textContent = `${row.querySelector('.row-title').textContent} moved to position ${rowsNow().indexOf(row) + 1} of ${stops.length}`; };
-  let drag = null;
+  let drag = null, dropping = null;
   const paintLifted = () => { drag.row.style.transform = `translateY(${drag.y}px) scale(${drag.scale})`; };
   const applyDrag = () => {
     const d = drag;
@@ -880,6 +979,7 @@ document.getElementById('playall').onclick = () => {
     drag.auto = requestAnimationFrame(autoScroll);
   };
   const startDrag = (row, e) => {
+    dropping?.commit();
     const rows = rowsNow(), from = rows.indexOf(row);
     drag = { row, rows, from, to: from, h: row.offsetHeight, startY: e.clientY, lastY: e.clientY, startScroll: scroller.scrollTop, y: 0, scale: 1, tracker: velocityTracker(), lift: null, auto: 0 };
     row.classList.add('lifted');
@@ -892,9 +992,11 @@ document.getElementById('playall').onclick = () => {
     const d = drag; if (!d) return; drag = null;
     cancelAnimationFrame(d.auto); d.lift?.stop();
     const { vy } = d.tracker.get();
-    let y = d.y, s = d.scale;
+    let y = d.y, s = d.scale, running = 2;
     const paint = () => { d.row.style.transform = `translateY(${y}px) scale(${s})`; };
-    spring({ from: y, to: (d.to - d.from) * d.h, velocity: vy, onUpdate: v => { y = v; paint(); }, onDone: () => {
+    const drop = { commit: () => {
+      if (dropping !== drop) return;
+      dropping = null; drop.move.stop(); drop.scale.stop();
       d.rows.forEach(r => { r.classList.remove('sliding', 'lifted'); r.style.transform = ''; });
       if (d.to !== d.from) {
         const order = rowsNow().filter(r => r !== d.row);
@@ -902,10 +1004,14 @@ document.getElementById('playall').onclick = () => {
         order.forEach(r => list.appendChild(r));
         announce(d.row);
       }
-    } });
-    spring({ from: s, to: 1, precision: 0.0005, onUpdate: v => { s = v; paint(); } });
+    } };
+    const settled = () => { running -= 1; if (running === 0) drop.commit(); };
+    dropping = drop;
+    drop.move = spring({ from: y, to: (d.to - d.from) * d.h, velocity: vy, onUpdate: v => { y = v; paint(); }, onDone: settled });
+    drop.scale = spring({ from: s, to: 1, precision: 0.0005, onUpdate: v => { s = v; paint(); }, onDone: settled });
   };
   const moveByKey = (row, step) => {
+    dropping?.commit();
     const neighbour = step < 0 ? row.previousElementSibling : row.nextElementSibling;
     if (!neighbour) return;
     const h = row.offsetHeight;
@@ -991,6 +1097,143 @@ document.getElementById('playall').onclick = () => {
       requestAnimationFrame(fill);
     }, 160);
   };
+})();
+
+/* ---------- Arrivals and waiting ---------- */
+(() => {
+  const more = document.getElementById('arrive-more'), menu = document.getElementById('arrive-menu');
+  const body = document.getElementById('arrive-body'), wait = document.getElementById('arrive-wait');
+  const fresh = ['Lentil soup', 'Grilled sea bream', 'Spinach pie', 'Lemon chicken'];
+  let dishes = ['Greek salad', 'Moussaka', 'Stuffed peppers'];
+  const rowHtml = (name, extra = '') => `<div class="dish-row ${extra}"><span class="row-title">${name}</span>${extra.includes('arriving') ? '<span class="changed-dot" aria-label="New"></span>' : ''}</div>`;
+  const render = (arrivingIndex = -1, movedIndex = -1, rise = false) => {
+    body.innerHTML = `<div class="island ${rise ? 'rise-in' : ''}">${dishes.map((d, i) => rowHtml(d, i === arrivingIndex ? 'arriving' : i === movedIndex ? 'moved' : '')).join('')}</div>`;
+  };
+  const closeMenu = () => {
+    if (menu.hidden || menu.classList.contains('closing')) return;
+    more.setAttribute('aria-expanded', 'false');
+    menu.classList.remove('opening'); menu.classList.add('closing');
+    menu.addEventListener('animationend', () => { menu.hidden = true; menu.classList.remove('closing'); }, { once: true });
+  };
+  const openMenu = () => {
+    menu.classList.remove('closing'); menu.hidden = false;
+    menu.classList.remove('opening'); void menu.offsetWidth; menu.classList.add('opening');
+    more.setAttribute('aria-expanded', 'true');
+    menu.querySelector('button').focus();
+  };
+  more.onclick = (e) => { e.stopPropagation(); more.getAttribute('aria-expanded') === 'true' ? closeMenu() : openMenu(); };
+  document.addEventListener('click', (e) => { if (!menu.contains(e.target)) closeMenu(); });
+  menu.addEventListener('keydown', (e) => {
+    const items = [...menu.querySelectorAll('button')], at = items.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); items[(at + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus(); }
+    if (e.key === 'Escape') { closeMenu(); more.focus(); }
+  });
+  let refreshing = false;
+  menu.onclick = (e) => {
+    const act = e.target.closest('[data-act]')?.dataset.act; if (!act) return;
+    e.stopPropagation(); closeMenu(); more.focus();
+    if (refreshing) return;
+    if (act === 'add') { dishes.push(fresh[dishes.length % fresh.length]); if (dishes.length > 5) dishes.shift(); render(dishes.length - 1); }
+    if (act === 'up') { const i = dishes.length - 1; [dishes[i - 1], dishes[i]] = [dishes[i], dishes[i - 1]]; render(-1, i - 1); }
+    if (act === 'refresh') {
+      refreshing = true; wait.hidden = false;
+      body.innerHTML = `<div class="sweep-bar"><i></i></div><div class="island">${dishes.map((_, i) => `<div class="skel-row"><i style="width:${[58, 44, 66, 50, 40][i % 5]}%"></i></div>`).join('')}</div>`;
+      setTimeout(() => { refreshing = false; wait.hidden = true; render(-1, -1, true); }, 1800);
+    }
+  };
+  render();
+})();
+
+/* ---------- 14 Push and pop ---------- */
+(() => {
+  const stage = document.getElementById('nav-stage');
+  const TREE = { title: 'Menus', rows: [
+    { title: 'Lunch', rows: [{ title: 'Greek salad' }, { title: 'Moussaka' }, { title: 'Stuffed peppers' }] },
+    { title: 'Dinner', rows: [{ title: 'Sea bream' }, { title: 'Lamb kleftiko' }] },
+    { title: 'Drinks', rows: [{ title: 'Frappé' }, { title: 'Mountain tea' }] },
+  ] };
+  const pages = [];
+  let motion = null;
+  const pathOf = () => '/' + pages.map(p => p.node.title.toLowerCase().replace(/ /g, '-')).slice(1).join('/');
+  const makePage = (node, depth) => {
+    const el = document.createElement('div');
+    el.className = 'screen nav-page';
+    el.innerHTML = `${depth ? '<button class="icon-btn" data-back aria-label="Back"><svg class="icon"><use href="#back"/></svg></button>' : ''}
+      <p class="title" tabindex="-1" style="margin-top:${depth ? 0 : 12}px;outline:none">${node.title}</p>
+      ${node.rows ? `<div class="island">${node.rows.map((r, i) => `<button class="nav-row" data-i="${i}"><span class="row-title">${r.title}</span>${r.rows ? '<svg class="icon"><use href="#chev"/></svg>' : ''}</button>`).join('')}</div>` : '<p class="footnote">Sizes, extras and allergens would live here.</p>'}
+      <p class="nav-path"></p>`;
+    stage.appendChild(el);
+    return { el, node };
+  };
+  const paint = (p) => {
+    if (pages.length < 2) return;
+    const top = pages[pages.length - 1].el, under = pages[pages.length - 2].el, w = stage.offsetWidth;
+    top.style.transform = `translateX(${(1 - p) * w}px)`;
+    under.style.transform = `translateX(${-0.28 * w * p}px)`;
+    under.style.opacity = String(1 - 0.3 * p);
+  };
+  const settle = () => {
+    pages.forEach((pg, i) => {
+      pg.el.inert = i !== pages.length - 1;
+      pg.el.style.visibility = i < pages.length - 2 ? 'hidden' : '';
+      pg.el.querySelector('.nav-path').textContent = pathOf();
+    });
+  };
+  const run = (from, to, velocity, done) => {
+    motion?.stop();
+    pages.forEach(pg => pg.el.inert = true);
+    let p = from;
+    motion = spring({ from, to, velocity, precision: 0.001, onUpdate: v => { p = v; paint(v); }, onDone: () => { motion = null; done(); } });
+    motion.progress = () => p;
+  };
+  const push = (node) => {
+    if (motion) { motion.stop(); motion = null; paint(1); settle(); }
+    pages.push(makePage(node, pages.length));
+    pages[pages.length - 1].el.style.zIndex = pages.length;
+    paint(0);
+    run(0, 1, 0, () => { settle(); pages[pages.length - 1].el.querySelector('.title').focus({ preventScroll: true }); });
+    pages[pages.length - 1].el.inert = false;
+  };
+  const pop = (from = 1, velocity = 0) => {
+    if (pages.length < 2) return;
+    run(from, 0, velocity, () => {
+      pages.pop().el.remove();
+      const top = pages[pages.length - 1].el; top.style.transform = ''; top.style.opacity = '';
+      settle();
+    });
+  };
+  stage.addEventListener('click', (e) => {
+    if (e.target.closest('[data-back]')) { pop(motion?.progress?.() ?? 1); return; }
+    const row = e.target.closest('.nav-row'); if (!row) return;
+    const child = pages[pages.length - 1].node.rows[+row.dataset.i];
+    push(child.rows ? child : { title: child.title });
+  });
+  let drag = null;
+  stage.addEventListener('pointerdown', (e) => {
+    if (pages.length < 2 || motion || e.button !== 0 || e.target.closest('button')) return;
+    const x = e.clientX - stage.getBoundingClientRect().left;
+    if (x > 28) return;
+    drag = { startX: e.clientX, tracker: velocityTracker() };
+    drag.tracker.add(e.clientX, 0);
+    stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    drag.tracker.add(e.clientX, 0);
+    paint(1 - clamp((e.clientX - drag.startX) / stage.offsetWidth, 0, 1));
+  });
+  const release = (e) => {
+    if (!drag) return;
+    const w = stage.offsetWidth, dx = clamp(e.clientX - drag.startX, 0, w), { vx } = drag.tracker.get();
+    drag = null;
+    const progress = 1 - dx / w, velocity = -vx / w;
+    if ((dx > 0.4 * w && vx > -500) || vx > 500) pop(progress, velocity);
+    else run(progress, 1, velocity, settle);
+  };
+  stage.addEventListener('pointerup', release);
+  stage.addEventListener('pointercancel', release);
+  pages.push(makePage(TREE, 0));
+  settle();
 })();
 </script>
 </body>

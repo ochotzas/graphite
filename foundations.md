@@ -29,15 +29,15 @@ The neutrals are one hue (cool graphite, OKLCH h≈270, very low chroma) at diff
 | `success` | Status icon or dot for done/healthy/synced, positive change in a chart |
 | `warning` | Status icon or dot for "needs attention" (expiring, low storage) |
 | `danger` | Errors and destructive actions (as above) |
-| `*-tint` | Banner and status-chip fills behind ink text |
-| `cat-slate` … `cat-lilac` | Colors people pick for their own things (list, tag, calendar, project), and chart series. `cat-*-tint` for chip and avatar fills |
+| `*-tint` | Banner fills behind ink text, tag fills behind colored text |
+| `cat-slate` … `cat-lilac` | Colors people pick for their own things (list, tag, calendar, project), and chart series. `cat-*-tint` for tag and avatar fills, `cat-*-text` for text on them |
 
 **Rules**
 - **Ink is the emphasis.** Primary buttons, checks, selected tabs and segments, progress, the main chart series — all `ink`. Never a colored button; the solid `danger` confirm is the one exception.
 - **Color only means something.** Status, a link, focus, "now", or a category the person chose. If the color has no meaning, it's ink or grey.
 - **Text on a tint stays `ink`.** The status color goes on the icon or dot, not the words. Status colors can be text on `bg`/`surface` (they pass AA) — e.g. "+12%" in `success` — but use that sparingly.
 - **A screen stays mostly grey.** Ink and graphite everywhere, color on a few small things (icons, dots, chips, one chart).
-- Categories: six, in a fixed order (slate, sage, sand, clay, rose, lilac). Shown as a dot, a chip (`cat-*-tint` fill, ink text, `cat-*` dot) or a chart mark. Never as a row or island background.
+- Categories: six, in a fixed order (slate, sage, sand, clay, rose, lilac). Shown as a dot, a tag (`cat-*-tint` fill, `cat-*-text` text) or a chart mark. Never as a row or island background.
 - Images and user content (photos, avatars) bring their own color — let them.
 - Never: gradients, glows, colored shadows, colored borders around islands, a brand color on chrome.
 - Dark mode is required. Same hues, lighter colors and darker tints (`tokens.css` has both).
