@@ -3,7 +3,7 @@
 Graphite by Olger Chotza — https://ochotzas.com
 
 ## 2.2.0 — 2026-11-24
-Motion learned in MenuOS, brought back to every project.
+Navigation, arrivals and waiting states join the motion system; chips, the date picker and selectors are reworked.
 - New signature effect: Push and pop. Paths decide push, pop, tab or swap; phones slide like a navigation stack (old page at −28%, 70% opacity), wide screens swap the detail pane, edge swipe back with velocity.
 - Everyday: new row in place (blur in + marker pop), menu and popover opening, and waiting indicators (spinner, sweep, skeleton) with exact timings and reduced-motion versions.
 - Lift to reorder: the moved row shows a fading highlight after keyboard or menu moves.
